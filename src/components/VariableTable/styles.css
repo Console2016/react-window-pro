@@ -1,0 +1,72 @@
+/* 
+.sticky-variable-size-grid-container {
+}
+
+.sticky-variable-size-grid-data-container {
+  position: absolute;
+} */
+
+/* .sticky-cell {
+  box-sizing: border-box;
+  padding: 16px;
+} */
+
+/* 冻结列 */
+/* .sticky-columns-container {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: lightblue;
+  width: min-content;
+} */
+
+/* .sticky-columns-row {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 10px;
+  border-bottom: 1px solid gray;
+  border-right: 1px solid gray;
+} */
+/* 
+.sticky-columns-cell {
+} */
+
+/* 冻结行 */
+/* .sticky-header-container {
+  position: sticky;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: row;
+  z-index: 3;
+} */
+
+.sticky-header-base {
+  z-index: 3;
+  /* background: coral; */
+  position: sticky;
+  left: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 10px;
+  /* border-right: 1px solid gray;
+  border-bottom: 1px solid gray; */
+}
+
+.sticky-header-scrollable {
+  position: absolute;
+}
+
+.sticky-header-column {
+  position: absolute;
+  background-color: lightblue;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 10px;
+  border-bottom: 1px solid gray;
+  border-right: 1px solid gray;
+}

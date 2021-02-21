@@ -1,7 +1,8 @@
-import { ReactElement } from "react";
+import { ReactElement, useEffect, useRef } from "react";
+import { VariableSizeGrid } from "react-window";
 import { CSSProperties } from "styled-components";
 import { DEFAULT_HEADER_HEIGHT, DEFAULT_COLUMN_WIDTH, DEFAULT_ROW_HEIGHT } from "./constant";
-import { IColumnsStyle, IHeadersStyle, IPreproccessProps, TObject } from "./interfaces";
+import { IColumnsStyle, IHeadersStyle, IPreproccessProps, TObject, IRawItem, IVariableColumn } from "./interfaces";
 
 // 缓存函数
 export const memoize = (fun: any, getKey: (...args: any) => string) => {
@@ -98,9 +99,8 @@ export const headerBuilder = ({
   offsetIndex: number;
   offsetWidth: number;
 }): IHeadersStyle[] => {
-
   // 冻结列会出现该情况
-  if(maxColumn < 0){
+  if (maxColumn < 0) {
     return [];
   }
 
@@ -166,7 +166,7 @@ export const columnsBuilder = ({
  * @returns result.columnWidthCache 宽度集合
  * @returns result.rowHeightCache 高度集合
  */
-export function preprocess<RecordType>({ header, columns, columnWidth }: IPreproccessProps<RecordType>) {
+export function usePreprocess<RecordType>({ header, columns, columnWidth }: IPreproccessProps<RecordType>) {
   //  固定行列(50px)
   let stickyHeight = DEFAULT_HEADER_HEIGHT,
     stickyColumns = [],
@@ -230,7 +230,7 @@ export function preprocess<RecordType>({ header, columns, columnWidth }: IPrepro
  * 展平rawData
  * @param rawData
  */
-function flatRawData(rawData: TObject[], columnsLength: number, childrenRawName: string, prefixKey = ""): TObject[] {
+function flatRawData(rawData: IRawItem[], columnsLength: number, childrenRawName: string, prefixKey = ""): TObject[] {
   let _rowData: TObject[] = [];
 
   for (let [index, raw] of rawData.entries()) {
@@ -260,7 +260,7 @@ export function preprocessRawData({
   childrenRawName,
 }: {
   rowHeight?: (index: number) => number;
-  rawData: TObject[];
+  rawData: IRawItem[];
   columnsLength: number;
   childrenRawName: string;
 }) {
@@ -285,4 +285,36 @@ export function preprocessRawData({
     rowTopCache,
     flatRawData: _rowData,
   };
+}
+
+export function useRespond<RecordType>({
+  columns,
+  columnWidth,
+  rowHeightCache,
+}: {
+  columns: IVariableColumn<RecordType>[];
+  columnWidth?: (index: number) => number;
+  rowHeightCache: number[];
+}) {
+  const ref = useRef<VariableSizeGrid>();
+
+  // 宽度发生变化,重置缓存
+  useEffect(() => {
+    if (ref.current) {
+      // 重置0列以后所有缓存
+      // 备注: 如果后期cellWidth变成函数, 需要考虑优化,否则外部使用不当会导致每次render都重置
+      ref.current.resetAfterColumnIndex(0, true);
+    }
+  }, [columns, columnWidth]);
+
+  // 行高发生变化,重置缓存
+  useEffect(() => {
+    if (ref.current) {
+      // 重置0列以后所有缓存
+      // 备注: 如果后期cellWidth变成函数, 需要考虑优化,否则外部使用不当会导致每次render都重置
+      ref.current.resetAfterRowIndex(0, true);
+    }
+  }, [rowHeightCache]);
+
+  return ref;
 }

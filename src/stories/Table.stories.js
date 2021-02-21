@@ -266,3 +266,39 @@ GroupExample.args = {
   stickyHeaderClassName: "left-sticky-header",
 };
 GroupExample.storyName = "分组";
+
+// 10. 多层分组
+export const MultiGroupExample = TemplateWithContainer.bind({});
+MultiGroupExample.args = {
+  header: true,
+  width: 800,
+  height: 400,
+  columns: columnsList.map((key, index) => ({ title: renderHeaderCell, dataIndex: key, width: 140, fixed: index < 3, render: renderCell })),
+  rawData: new Array(3).fill(null).map((groupValue, groupIndex) => {
+    const group = { id: groupIndex, children: [] };
+
+    group.children = new Array(5).fill(null).map((cgroupValue, cgroupIndex) => {
+      let cgroup = { id: `${groupIndex}-${cgroupIndex}`, children: [] };
+
+      cgroup.children = new Array(10).fill(null).map((value, index) => {
+        let row = { id: `${groupIndex}-${cgroupIndex}-${index}` };
+
+        columnsList.forEach((key) => (row[key] = `${groupIndex}_${cgroupIndex}_${index}_${key}`));
+
+        return row;
+      });
+
+      return cgroup;
+    });
+
+    return group;
+  }),
+  groupRowRender: ({ columnIndex, data, width }) => {
+    return <GroupRow>{data.id}</GroupRow>;
+  },
+  stickyBodyClassName: "left-sticky-body",
+  bodyClassName: "right-sticky-body",
+  headerClassName: "right-sticky-header",
+  stickyHeaderClassName: "left-sticky-header",
+};
+MultiGroupExample.storyName = "多层分组";

@@ -3,3 +3,5 @@ backup
 dist
 es
 lib
+.gitignore
+typings

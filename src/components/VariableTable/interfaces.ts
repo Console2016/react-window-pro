@@ -2,7 +2,7 @@
  * @Author: sun.t
  * @Date: 2020-09-16 09:35:50
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-02-15 15:23:47
+ * @Last Modified time: 2021-02-18 13:35:40
  */
 import { VariableSizeGrid, GridOnScrollProps } from "react-window";
 import { ReactNode, Ref } from "react";
@@ -42,14 +42,20 @@ type TRowRender = ({ columnIndex, data }: { columnIndex: number; data: TObject; 
 
 export type TObject = {
   [key: string]: any;
+  children?: TObject[];
 };
+
+export interface IRawItem {
+  [key: string]: any;
+  children?: IRawItem[];
+}
 
 export interface IProps<RecordType> {
   ref?: Ref<VariableSizeGrid>;
   outerRef?: Ref<HTMLElement>;
   innerRef?: Ref<HTMLElement>;
   direction?: "ltr" | "rtl";
-  rawData: TObject[];
+  rawData: IRawItem[];
   columnWidth?: (index: number) => number; // todo 兼容number类型
   rowHeight?: (index: number) => number; // todo 兼容number类型
   onScroll?: (props: GridOnScrollProps) => any;

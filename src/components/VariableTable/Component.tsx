@@ -2,13 +2,13 @@
  * @Author: sun.t
  * @Date: 2020-09-14 15:50:04
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-01-17 00:26:17
+ * @Last Modified time: 2021-02-20 14:36:40
  * @remark: 1. rawData发生变化会导致所有高度缓存刷新
  */
-import React, { useCallback, forwardRef, createContext, ReactElement, useMemo } from "react";
+import React, { useCallback, forwardRef, createContext, ReactElement, useMemo, ForwardedRef } from "react";
 import { VariableSizeGrid as Grid } from "react-window";
 import { IProps, IHeadersStyle, IStickyContext } from "./interfaces";
-import { getRenderedCursor, headerBuilder, columnsBuilder, preprocess, preprocessRawData } from "./helper";
+import { getRenderedCursor, headerBuilder, columnsBuilder, usePreprocess, preprocessRawData, useRespond } from "./helper";
 import Cell from "./Cell";
 import StickyHeader from "./StickyHeader";
 import StickyColumns from "./StickyColumns";
@@ -159,7 +159,7 @@ const StickyGridContext = createContext<IStickyContext>({
  * @param param0
  * @interface const Component: <RecordType>(props: IProps<RecordType>, ref?: React.Ref<Grid>) => ReactElement | null = (props, ref) => {};
  */
-function Component<RecordType>(props: IProps<RecordType>, ref?: React.Ref<Grid>): ReactElement | null {
+function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Grid>): ReactElement | null {
   const {
     outerRef,
     innerRef,
@@ -202,7 +202,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: React.Ref<Grid>)
     columnLeftCache,
     columnWidthCache,
   } = useMemo(
-    () => preprocess<RecordType>({ header, columns, columnWidth }),
+    () => usePreprocess<RecordType>({ header, columns, columnWidth }),
     [header, columns, columnWidth]
   );
 
@@ -216,6 +216,8 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: React.Ref<Grid>)
     () => preprocessRawData({ rowHeight, rawData, columnsLength: columns.length, childrenRawName }),
     [rawData, rowHeight, columns.length, childrenRawName]
   );
+
+  const refCache = useRespond({ columns, columnWidth, rowHeightCache });
 
   // 单元格渲染
   const GridCell = useCallback(
@@ -272,7 +274,14 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: React.Ref<Grid>)
       }}
     >
       <Grid
-        ref={ref}
+        ref={(e: Grid) => {
+          refCache.current = e;
+          if (typeof ref === "function") {
+            ref(e);
+          } else {
+            ref && (ref.current = e);
+          }
+        }}
         outerRef={outerRef}
         innerRef={innerRef}
         direction={direction}

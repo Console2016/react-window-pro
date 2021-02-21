@@ -1,0 +1,3 @@
+ - [Matrix] cellWidth 支持function
+ - [Matrix] 滚动到指定id块
+ - [list] 行首拖动

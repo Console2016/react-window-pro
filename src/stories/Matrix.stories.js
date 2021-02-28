@@ -2,6 +2,8 @@ import React from "react";
 import VariableMatrix from "../components/VariableMatrix";
 // import { useSize } from "./common/useSize";
 import styled from "styled-components";
+import randomColor from "./common/randomColor";
+import mock_2 from "./mock/2.json";
 // import { MatrixData1 } from "./dummyData";
 
 const Component = {
@@ -16,11 +18,11 @@ const Template = (args) => <VariableMatrix {...args} />;
 // 0. Default
 export const Default = Template.bind({});
 Default.args = {
-  width: 800,
-  height: 400,
-  cellHeight: 80,
-  cellWidth: 200,
-  rawData: new Array(3000).fill(null).map((value, index) => ({ id: index })),
+  width: 1218,
+  height: 716,
+  cellHeight: 53.47,
+  cellWidth: 267.35,
+  rawData: new Array(60).fill(null).map((value, index) => ({ id: index })),
 };
 
 // 1. 分组
@@ -45,8 +47,12 @@ GroupExample.storyName = "分组";
 
 // 2. 多层分组
 export const MultiGroupExample = Template.bind({});
+const Group = styled.div`
+  height: 100%;
+  border: 1px solid;
+`;
 MultiGroupExample.args = {
-  width: 800,
+  width: 1500,
   height: 400,
   cellHeight: 80,
   cellWidth: 200,
@@ -94,6 +100,7 @@ const Right = styled.div`
   padding: 5px;
   background-color: #1a344f;
 `;
+
 CustomClassExample.args = {
   width: 1500,
   height: 400,
@@ -111,8 +118,8 @@ CustomClassExample.args = {
 };
 CustomClassExample.storyName = "自定义样式";
 
-// 4. 自定义分组样式
-export const CustomGroupClassExample = Template.bind({});
+// 4. 自定义分组头样式
+export const CustomGroupRowClassExample = Template.bind({});
 const GroupRowContainer = styled.div`
   padding: 5px;
   height: -webkit-fill-available;
@@ -126,7 +133,7 @@ const GroupRow = styled.div`
   box-shadow: 0px 0px 2px rgb(0 0 0 / 30%);
   box-sizing: border-box;
 `;
-CustomGroupClassExample.args = {
+CustomGroupRowClassExample.args = {
   width: 1500,
   height: 400,
   cellHeight: 80,
@@ -147,6 +154,45 @@ CustomGroupClassExample.args = {
 
     return group;
   }),
+  groupRender: ({ style }) => {
+    return (
+      <div style={{ ...style, backgroundColor: randomColor() }}>
+        <Group />
+      </div>
+    );
+  },
+  cellRender: ({ rowIndex, columnIndex, data, style }) => (
+    <CellContainer>
+      <Cell>
+        <Left></Left>
+        <Right>{data.id}</Right>
+      </Cell>
+    </CellContainer>
+  ),
+  groupRowRender: ({ rowIndex, columnIndex, data, style }) => (
+    <GroupRowContainer>
+      <GroupRow>{data.id}</GroupRow>
+    </GroupRowContainer>
+  ),
+};
+
+CustomGroupRowClassExample.storyName = "自定义分组头样式";
+
+// 5. 自定义分组样式
+export const CustomGroupClassExample = Template.bind({});
+CustomGroupClassExample.args = {
+  width: 1500,
+  height: 400,
+  cellHeight: 80,
+  cellWidth: 200,
+  rawData: mock_2,
+  groupRender: ({ style }) => {
+    return (
+      <div style={{ ...style, backgroundColor: randomColor() }}>
+        <Group />
+      </div>
+    );
+  },
   cellRender: ({ rowIndex, columnIndex, data, style }) => (
     <CellContainer>
       <Cell>

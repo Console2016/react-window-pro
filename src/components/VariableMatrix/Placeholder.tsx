@@ -3,7 +3,7 @@ import { IRawItem, TPlaceholder } from "./interfaces";
 
 interface IPlaceholderProps {
   style: CSSProperties;
-  placeholder: TPlaceholder;
+  placeholder?: TPlaceholder;
   columnIndex: number;
   rowIndex: number;
   data: IRawItem;

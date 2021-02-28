@@ -2,12 +2,13 @@
  * @Author: sun.t
  * @Date: 2021-02-18 13:23:51
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-02-20 22:43:48
+ * @Last Modified time: 2021-02-28 20:59:10
  */
 import React, { createContext, forwardRef, ReactElement, useCallback, useMemo, ForwardedRef } from "react";
-import { VariableSizeGrid as Matrix } from "react-window";
+import { GridChildComponentProps, VariableSizeGrid as Matrix } from "react-window";
 import Cell from "./Cell";
-import { usePreprocess, useRespond } from "./helper";
+import Group from "./Group";
+import { usePreprocess, useRespond } from "./hooks";
 import { ScrollbarSize } from "./constant";
 import { IProps, IContext, IRawItem } from "./interfaces";
 
@@ -16,11 +17,12 @@ const EmptyArray: IRawItem[] = [];
 const MatrixContext = createContext<IContext>({
   innerClassName: "",
   scrollbarSize: ScrollbarSize,
+  groupStyleMap: {},
 });
 
 const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...rest }, ref) => (
   <MatrixContext.Consumer>
-    {({ innerClassName, scrollbarSize }) => {
+    {({ innerClassName, scrollbarSize, groupStyleMap, groupRender }) => {
       const containerStyle = {
         ...rest.style,
         width: rest.style.width,
@@ -29,6 +31,14 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
 
       return (
         <div className={innerClassName} ref={ref} {...{ ...rest, style: containerStyle }}>
+          {/* 分组块样式 */}
+          {groupRender
+            ? Object.keys(groupStyleMap).map((key) => {
+                const { raw, style } = groupStyleMap[key];
+                return <Group key={key} groupRender={groupRender} style={style} data={raw} />;
+              })
+            : null}
+          {/* 单元格 */}
           {children}
         </div>
       );
@@ -54,6 +64,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Mat
     itemKey,
     placeholder,
     groupRowRender,
+    groupRender,
     cellRender,
     className,
     style,
@@ -69,20 +80,21 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Mat
 
   const _width = width - scrollbarSize;
 
-  const { columnCount, rowCount, positionMap, positionCache, rowHeightCache } = useMemo(
+  const { columnCount, rowCount, positionMap, positionCache, rowHeightCache, groupStyleMap } = useMemo(
     () => usePreprocess({ groupRowHeight, rawData, cellHeight, cellWidth, childrenRawName, width: _width }),
     [rawData, groupRowHeight, cellHeight, cellWidth, childrenRawName, _width]
   );
 
   const refCache = useRespond({ rowHeightCache, cellWidth });
 
-  const _rowHegiht = useCallback((index) => rowHeightCache[index], [rowHeightCache]),
+  const _rowHegiht = useCallback((index: number) => rowHeightCache[index], [rowHeightCache]),
     _columnWidth = useCallback(() => cellWidth, [cellWidth]);
 
   // 单元格渲染
   const GridCell = useCallback(
-    ({ columnIndex, rowIndex, style, isScrolling }) => {
-      const cellData = positionMap[`${rowIndex}-${columnIndex}`];
+    ({ columnIndex, rowIndex, style, isScrolling }: GridChildComponentProps) => {
+      const key = `${rowIndex}-${columnIndex}`;
+      const cellData = positionMap[key];
 
       let _style = { ...style };
 
@@ -94,7 +106,8 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Mat
 
       // 分组样式
       if (isGroupCell) {
-        _style.width = _width;
+        // _style.width = _width;
+        _style.width = cellWidth * columnCount;
         // _style.borderBottom = "1px solid";
       }
 
@@ -105,18 +118,18 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Mat
           style={_style}
           data={cellData}
           isGroupCell={isGroupCell}
-          showPlaceholder={isScrolling && placeholder}
+          showPlaceholder={!!isScrolling && !!placeholder}
           placeholder={placeholder}
           groupRowRender={groupRowRender}
           cellRender={cellRender}
         ></Cell>
       );
     },
-    [placeholder, childrenRawName, positionMap, groupRowRender, _width]
+    [placeholder, childrenRawName, positionMap, groupRowRender, cellWidth, columnCount]
   );
 
   return (
-    <MatrixContext.Provider value={{ innerClassName, scrollbarSize }}>
+    <MatrixContext.Provider value={{ innerClassName, scrollbarSize, groupStyleMap, groupRender }}>
       <Matrix
         ref={(e: Matrix) => {
           refCache.current = e;

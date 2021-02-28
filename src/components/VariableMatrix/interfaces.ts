@@ -2,9 +2,9 @@
  * @Author: sun.t
  * @Date: 2021-02-18 13:26:10
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-02-20 20:38:43
+ * @Last Modified time: 2021-02-28 00:35:39
  */
-import { CSSProperties, ReactNode, Ref } from "react";
+import { CSSProperties, ReactElement, ReactNode, Ref } from "react";
 import { VariableSizeGrid, GridOnScrollProps } from "react-window";
 
 export type TRowRender = ({
@@ -18,6 +18,8 @@ export type TRowRender = ({
   data: IRawItem;
   style: CSSProperties;
 }) => ReactNode;
+
+export type TGroupRender = ({ data, style }: { data: IRawItem; style: CSSProperties }) => ReactElement;
 
 export type TCellRender = ({
   rowIndex,
@@ -54,6 +56,7 @@ export interface IProps<T> {
   itemKey: ({ columnIndex, data, rowIndex }: { columnIndex: number; data: any; rowIndex: number }) => string;
   placeholder?: TPlaceholder;
   groupRowRender?: TRowRender;
+  groupRender?: TGroupRender;
   cellRender?: TCellRender;
   className?: string;
   style?: CSSProperties;
@@ -70,4 +73,22 @@ export interface IProps<T> {
 export interface IContext {
   innerClassName: string;
   scrollbarSize: number;
+  groupStyleMap: TGroupStyleMap;
+  groupRender?: TGroupRender;
 }
+
+export type TGroupSize = { top: number; width: number; left: number; height: number };
+
+export type TGroupStyleMap = {
+  [key: string]: { raw: IRawItem; style: TGroupSize };
+};
+
+export interface TPositionMap {
+  [key: string]: IRawItem;
+}
+
+export interface TRowHeight {
+  [key: number]: number;
+}
+
+export type TPositionCache = { [key: string]: { top: number; left: number } };

@@ -1,8 +1,8 @@
-import { ReactElement, useEffect, useRef } from "react";
-import { VariableSizeGrid } from "react-window";
+import { ReactElement } from "react";
+
 import { CSSProperties } from "styled-components";
-import { DEFAULT_HEADER_HEIGHT, DEFAULT_COLUMN_WIDTH, DEFAULT_ROW_HEIGHT } from "./constant";
-import { IColumnsStyle, IHeadersStyle, IPreproccessProps, TObject, IRawItem, IVariableColumn } from "./interfaces";
+import {  DEFAULT_ROW_HEIGHT } from "./constant";
+import { IColumnsStyle, IHeadersStyle,  TObject, IRawItem } from "./interfaces";
 
 // 缓存函数
 export const memoize = (fun: any, getKey: (...args: any) => string) => {
@@ -152,79 +152,6 @@ export const columnsBuilder = ({
   return rows;
 };
 
-/**
- * 计算固定行列
- * @param header
- * @param columns 列配置
- * @param columnWidth 列宽计算函数
- * @returns result
- * @returns result.stickyHeight 冻结行高
- * @returns result.stickyColumnsCount 冻结列columns
- * @returns result.nonStrickyColumnsCount 非冻结列columns
- * @returns result.stickyWidth 总冻结列宽度
- * @returns result.columnLeftCache 列left位置集合
- * @returns result.columnWidthCache 宽度集合
- * @returns result.rowHeightCache 高度集合
- */
-export function usePreprocess<RecordType>({ header, columns, columnWidth }: IPreproccessProps<RecordType>) {
-  //  固定行列(50px)
-  let stickyHeight = DEFAULT_HEADER_HEIGHT,
-    stickyColumns = [],
-    nonStrickyColumns = [];
-
-  // 屏蔽header
-  if (!header) stickyHeight = 0;
-
-  // 使用用户定义高度
-  if (header && typeof header === "number") stickyHeight = header;
-
-  // 归类冻结与非冻结
-  let isOver = false;
-  for (let column of columns.values()) {
-    const { fixed } = column;
-    // "left" / "right"
-    if (fixed && !isOver) {
-      stickyColumns.push(column);
-    } else {
-      isOver = true;
-      nonStrickyColumns.push(column);
-    }
-  }
-
-  // 计算所有宽度 columnWidth() -> column.width -> DEFAULT_COLUMN_WIDTH
-  const columnWidthCache: number[] = columns.map((column, index) =>
-    columnWidth ? columnWidth(index) : column.width ? Number(column.width) : DEFAULT_COLUMN_WIDTH
-  );
-  // 总冻结列宽度
-  const stickyWidth = stickyColumns.reduce((totalWidth, column, index) => totalWidth + columnWidthCache[index], 0);
-  // 非冻结列宽度
-  const nonStrickyWidth = nonStrickyColumns.reduce(
-    (totalWidth, column, index) => totalWidth + columnWidthCache[index + stickyColumns.length],
-    0
-  );
-
-  // 计算所有列left偏移量
-  const columnLeftCache = columns.reduce(
-    (list, column, index) => {
-      // 最后一列不用计算
-      if (index === columns.length - 1) {
-        return list;
-      }
-      return list.concat([columnWidthCache[index] + list[list.length - 1]]);
-    },
-    [0]
-  );
-
-  return {
-    stickyHeight,
-    stickyWidth,
-    nonStrickyWidth,
-    stickyColumnsCount: stickyColumns.length,
-    nonStrickyColumnsCount: nonStrickyColumns.length,
-    columnLeftCache,
-    columnWidthCache,
-  };
-}
 
 /**
  * 展平rawData
@@ -259,7 +186,7 @@ export function preprocessRawData({
   columnsLength,
   childrenRawName,
 }: {
-  rowHeight?: (index: number) => number;
+  rowHeight?: (index: number, data:IRawItem) => number;
   rawData: IRawItem[];
   columnsLength: number;
   childrenRawName: string;
@@ -271,9 +198,9 @@ export function preprocessRawData({
   let rowHeightCache: number[] = [],
     rowTopCache: number[] = [0];
 
-  for (let [index] of _rowData.entries()) {
+  for (let [index, data] of _rowData.entries()) {
     // height cache
-    rowHeightCache[index] = rowHeight ? rowHeight(index) : DEFAULT_ROW_HEIGHT;
+    rowHeightCache[index] = rowHeight ? rowHeight(index, data) : DEFAULT_ROW_HEIGHT;
 
     if (index > 0) {
       rowTopCache.push(rowHeightCache[index - 1] + rowTopCache[rowTopCache.length - 1]);
@@ -287,34 +214,3 @@ export function preprocessRawData({
   };
 }
 
-export function useRespond<RecordType>({
-  columns,
-  columnWidth,
-  rowHeightCache,
-}: {
-  columns: IVariableColumn<RecordType>[];
-  columnWidth?: (index: number) => number;
-  rowHeightCache: number[];
-}) {
-  const ref = useRef<VariableSizeGrid>();
-
-  // 宽度发生变化,重置缓存
-  useEffect(() => {
-    if (ref.current) {
-      // 重置0列以后所有缓存
-      // 备注: 如果后期cellWidth变成函数, 需要考虑优化,否则外部使用不当会导致每次render都重置
-      ref.current.resetAfterColumnIndex(0, true);
-    }
-  }, [columns, columnWidth]);
-
-  // 行高发生变化,重置缓存
-  useEffect(() => {
-    if (ref.current) {
-      // 重置0列以后所有缓存
-      // 备注: 如果后期cellWidth变成函数, 需要考虑优化,否则外部使用不当会导致每次render都重置
-      ref.current.resetAfterRowIndex(0, true);
-    }
-  }, [rowHeightCache]);
-
-  return ref;
-}

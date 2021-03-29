@@ -33,6 +33,7 @@ const Component = ({ columnIndex, rowIndex, style, column, data, showPlaceholder
             dataIndex,
             value,
             record: data,
+            column
           })
         : value}
     </Cell>

@@ -2,7 +2,7 @@
  * @Author: sun.t
  * @Date: 2020-09-16 09:35:50
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-02-18 13:35:40
+ * @Last Modified time: 2021-03-29 20:26:34
  */
 import { VariableSizeGrid, GridOnScrollProps } from "react-window";
 import { ReactNode, Ref } from "react";
@@ -15,18 +15,24 @@ export interface IVariableColumn<RecordType = any> {
   title?: TTitle;
   dataIndex: string;
   fixed?: boolean;
+  sortOrder?: "ascend" | "descend" | false;
+  sorter?: boolean;
+  resizer?:boolean;
+  reposition?:boolean;
   render?: ({
     columnIndex,
     rowIndex,
     dataIndex,
     value,
     record,
+    column,
   }: {
     columnIndex: number;
     rowIndex: number;
     dataIndex: string;
     value: any;
     record: RecordType;
+    column: IVariableColumn;
   }) => ReactNode;
   [prop: string]: any;
 }
@@ -50,6 +56,22 @@ export interface IRawItem {
   children?: IRawItem[];
 }
 
+type TInitialScrollRowIndex = ((flatRawData: TObject[]) => number) | number;
+type TInitialScrollColumnIndex<RecordType> = ((columns: IVariableColumn<RecordType>[]) => number) | number;
+
+// table onChnage callback
+export type TOnChange = ({
+  sorter,
+  columnSize,
+  columnPosition,
+  action,
+}: {
+  sorter?: { dataIndex: string; order: "ascend" | "descend" | undefined; column: IVariableColumn; columns: IVariableColumn[] };
+  columnSize?: { dataIndex: string; width: number; column: IVariableColumn; columns: IVariableColumn[] };
+  columnPosition?: { dataIndex: string; from: number; to: number; columns: IVariableColumn[] };
+  action: "sort" | "resizeColumn" | "repositionColumn";
+}) => void;
+
 export interface IProps<RecordType> {
   ref?: Ref<VariableSizeGrid>;
   outerRef?: Ref<HTMLElement>;
@@ -57,15 +79,18 @@ export interface IProps<RecordType> {
   direction?: "ltr" | "rtl";
   rawData: IRawItem[];
   columnWidth?: (index: number) => number; // todo 兼容number类型
-  rowHeight?: (index: number) => number; // todo 兼容number类型
+  rowHeight?: (index: number, data: IRawItem) => number; // todo 兼容number类型
   onScroll?: (props: GridOnScrollProps) => any;
+  onChange?: TOnChange;
   columns: IVariableColumn<RecordType>[];
   height: number;
   width: number;
   header?: boolean | number;
   placeholder?: TPlaceholder;
-  initialScrollLeft: number;
-  initialScrollTop: number;
+  initialScrollRowIndex?: TInitialScrollRowIndex;
+  initialScrollColumnIndex?: TInitialScrollColumnIndex<RecordType>;
+  initialScrollLeft?: number;
+  initialScrollTop?: number;
   itemKey: ({ columnIndex, data, rowIndex }: { columnIndex: number; data: any; rowIndex: number }) => string;
   className?: string;
   style?: CSSProperties;
@@ -83,6 +108,7 @@ export interface IProps<RecordType> {
 }
 
 export interface IStickyContext {
+  height:number;
   stickyHeight: number; // 冻结行总高度
   stickyWidth: number; // 冻结列总宽度
   nonStrickyWidth: number; // 非冻结列总宽度
@@ -105,6 +131,7 @@ export interface IStickyContext {
   placeholder?: TPlaceholder;
   useStickyIsScrolling?: boolean;
   groupRowRender?: TRowRender;
+  onChange?: TOnChange;
 }
 
 // 单行表头样式计算结果
@@ -123,7 +150,9 @@ export interface IColumnsStyle {
   rowIndex: number;
 }
 
+// header component props
 export interface IStickyHeaderProps {
+  tableHeight: number;
   stickyHeight: number;
   stickyWidth: number;
   headerColumns: IHeadersStyle[];
@@ -131,6 +160,7 @@ export interface IStickyHeaderProps {
   stickyHeaderColumns: IHeadersStyle[];
   stickyClassName: string;
   className: string;
+  onChange?: TOnChange;
 }
 
 export interface IStickyColumnsProps {
@@ -160,6 +190,18 @@ export interface IPlaceholderProps {
   placeholder: TPlaceholder;
   columnIndex: number;
   rowIndex: number;
+}
+
+export interface IInitialScrollProps<RecordType> {
+  initialScrollLeft?: number;
+  initialScrollTop?: number;
+  initialScrollRowIndex?: TInitialScrollRowIndex;
+  initialScrollColumnIndex?: TInitialScrollColumnIndex<RecordType>;
+  columns: IVariableColumn<RecordType>[];
+  stickyColumnsCount: number;
+  flatRawData: TObject[];
+  columnWidthCache: number[];
+  rowHeightCache: number[];
 }
 
 // export type GridComponent<RecordType = any> = (

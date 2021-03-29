@@ -2,10 +2,8 @@
  * @Author: sun.t
  * @Date: 2021-02-18 16:34:29
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-02-28 19:28:57
+ * @Last Modified time: 2021-03-01 14:32:35
  */
-import { useEffect, useRef } from "react";
-import { VariableSizeGrid } from "react-window";
 import { IRawItem, TGroupSize, TGroupStyleMap, TPositionCache, TPositionMap, TRowHeight } from "./interfaces";
 
 interface ICalculate {
@@ -16,7 +14,7 @@ interface ICalculate {
   childrenRawName: string;
   rowCursor?: number;
   prefixKey?: string;
-  groupRowHeight: ((raw: IRawItem, index: number) => number) | number;
+  groupRowHeight: ((index: number, raw: IRawItem) => number) | number;
   accumulationTop?: number;
 }
 
@@ -31,6 +29,8 @@ interface ICalculateReturn {
 }
 
 const isLastOne = (index: number, length: number) => index === length - 1;
+
+const diff = (a: any, b: any) => toString.call(a) === toString.call(b);
 
 /**
  * 展平rawData
@@ -55,18 +55,36 @@ export function calculate({
     positionCache: TPositionCache = {},
     groupStyleMap: TGroupStyleMap = {};
 
+  // 如果数据为空
+  if (rawData.length === 0) {
+    return {
+      positionMap,
+      positionCache,
+      rowHeightCache,
+      rowCursor,
+      accumulationTop,
+      groupStyle: { top: accumulationTop, left: 0, width: cellWidth * columnCount, height: 0 },
+      groupStyleMap,
+    };
+  }
+
   for (let [index, raw] of rawData.entries()) {
     const _prefixKey = !prefixKey ? String(index) : `${prefixKey}-${index}`;
 
     // (非)分组数据混用
     const prevRaw = rawData[index - 1];
-    if (prevRaw && toString.call(prevRaw[childrenRawName]) !== toString.call(raw[childrenRawName])) {
+    if (prevRaw && !diff(prevRaw[childrenRawName], raw[childrenRawName])) {
       // 行指针需要下移
       _rowCursor += 1;
       // 列指针需要归0
       _columnCursor = 0;
-      // 行高偏移调整
-      _rowTop += Object.values(rowHeightCache).reduce((prev, curr) => prev + curr, 0);
+
+      // 前一次循环非分组(前一次循环的行高需要追加)
+      if (!prevRaw[childrenRawName]) {
+        _rowTop += rowHeightCache[_rowCursor - 1];
+      }
+      // 行高需要追加上一行列宽
+      // _rowTop += Object.values(rowHeightCache).reduce((prev, curr) => prev + curr, 0);
     }
 
     if (raw[childrenRawName]) {
@@ -74,7 +92,7 @@ export function calculate({
       positionMap[`${_rowCursor}-${_columnCursor}`] = { ...raw, key: _prefixKey };
 
       // 分组头行高
-      let _rowHeight = typeof groupRowHeight === "function" ? groupRowHeight(raw, index) : groupRowHeight;
+      let _rowHeight = typeof groupRowHeight === "function" ? groupRowHeight(index, raw) : groupRowHeight;
 
       // 分组头位置
       positionCache[`${_rowCursor}-${_columnCursor}`] = { top: _rowTop, left: 0 };
@@ -82,10 +100,7 @@ export function calculate({
       // 分组头行高
       rowHeightCache[_rowCursor] = _rowHeight;
 
-      // 行指针+1
-      //   _rowCursor += 1;
-
-      // 行偏移
+      // 下一行top位置
       _rowTop += _rowHeight;
 
       // 递归计算子元素
@@ -115,7 +130,12 @@ export function calculate({
       rowHeightCache = { ...rowHeightCache, ...childrenRowHeightCache };
 
       // 对递归计算中的当前行指针下移 (数组末尾不能加1,下面已无数据)
-      _rowCursor = isLastOne(index, rawData.length) ? childrenRowCursor : childrenRowCursor + 1;
+      // 如果循环还未结束，并且和下一轮循环children不同，则这里也不用追加，放到下一级判断逻辑追加
+      const _isLastOne = isLastOne(index, rawData.length);
+      _rowCursor =
+        _isLastOne || (!_isLastOne && !diff(rawData[index][childrenRawName], rawData[index + 1][childrenRawName]))
+          ? childrenRowCursor
+          : childrenRowCursor + 1;
 
       // 当前分组属性
       childrenGroupSize.height += _rowHeight; // 循环高度 + 分组头高度 = 分组高度
@@ -144,10 +164,15 @@ export function calculate({
       // 移动列指针
       _columnCursor += 1;
 
-      // 是否超出列限制 & 任有循环
+      // 超出列限制 & 循环未结束 = 换行
       if (_columnCursor >= columnCount && index < rawData.length - 1) {
         _columnCursor = 0;
         _rowCursor += 1;
+        _rowTop += cellHeight;
+      }
+
+      // 累计最后一行高度(下一行数据top位置)
+      if (index === rawData.length - 1) {
         _rowTop += cellHeight;
       }
     }
@@ -159,7 +184,7 @@ export function calculate({
     positionCache, // 当前循环数据块样式缓存
     rowHeightCache, // 当前循环高度缓存
     rowCursor: _rowCursor, // 当前行指针位置
-    accumulationTop: rawData[rawData.length - 1][childrenRawName] ? _rowTop : _rowTop + cellHeight, // 下一行数据top位置(累计行高), 如果最后一次循环为分组则不用追加行高
+    accumulationTop: _rowTop,
     groupStyle: {
       // 当前循环(分组)样式
       top: accumulationTop, // 存在偏移,未将分组头包含

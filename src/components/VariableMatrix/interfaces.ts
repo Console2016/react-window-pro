@@ -2,7 +2,7 @@
  * @Author: sun.t
  * @Date: 2021-02-18 13:26:10
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-02-28 00:35:39
+ * @Last Modified time: 2021-03-13 13:42:10
  */
 import { CSSProperties, ReactElement, ReactNode, Ref } from "react";
 import { VariableSizeGrid, GridOnScrollProps } from "react-window";
@@ -46,7 +46,7 @@ export interface IProps<T> {
   ref?: Ref<VariableSizeGrid>;
   outerRef?: Ref<HTMLElement>;
   innerRef?: Ref<HTMLElement>;
-  groupRowHeight?: ((raw: IRawItem, index: number) => number) | number;
+  groupRowHeight?: ((index: number, raw: IRawItem) => number) | number;
   cellHeight: number;
   cellWidth: number;
   height: number;

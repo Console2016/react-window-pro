@@ -1,6 +1,7 @@
 import React, { createRef, Fragment } from "react";
 import VariableTable from "../components/VariableTable";
 import styled from "styled-components";
+import { action } from "@storybook/addon-actions";
 
 const Component = {
   component: VariableTable,
@@ -155,7 +156,7 @@ SkeletonExample.args = {
 };
 SkeletonExample.storyName = "骨架优化";
 
-// 6. 初始化偏移(TODO)
+// 6. 初始化偏移[偏移量]
 export const InitialOffsetExample = Template.bind({});
 InitialOffsetExample.args = {
   header: false,
@@ -172,9 +173,28 @@ InitialOffsetExample.args = {
   initialScrollLeft: 100,
   initialScrollTop: 1000,
 };
-InitialOffsetExample.storyName = "初始化偏移";
+InitialOffsetExample.storyName = "初始化偏移[偏移量]";
 
-// 7. 滚动到指定项目
+// 7. 初始化偏移[index]
+export const InitialIndexOffsetExample = Template.bind({});
+InitialIndexOffsetExample.args = {
+  header: false,
+  width: 800,
+  height: 400,
+  columns: columnsList.map((key, index) => ({ title: key, dataIndex: key, width: 140 })),
+  rawData: new Array(1000).fill(null).map((v, index) => {
+    let row = { id: `${index}` };
+
+    columnsList.forEach((key) => (row[key] = `${index}_${key}`));
+
+    return row;
+  }),
+  initialScrollRowIndex: (flatRawData) => 100,
+  initialScrollColumnIndex: (columns) => 10,
+};
+InitialIndexOffsetExample.storyName = "初始化偏移[index]";
+
+// 8. 滚动到指定项目
 let ScrollGridRef = createRef();
 export const ScrollExample = () => (
   <Fragment>
@@ -228,8 +248,23 @@ export const ScrollExample = () => (
 
 ScrollExample.storyName = "滚动到指定位置";
 
-// 8. 排序
-// itemKey
+// 9 排序
+export const SortExample = Template.bind({});
+SortExample.args = {
+  header: true,
+  width: 800,
+  height: 400,
+  columns: columnsList.map((key) => ({ title: renderHeaderCell, dataIndex: key, width: 140, sorter: !["a", "b"].includes(key) })),
+  rawData: new Array(50).fill(null).map((v, index) => {
+    let row = { id: `${index}` };
+
+    columnsList.forEach((key) => (row[key] = `${index}_${key}`));
+
+    return row;
+  }),
+  onChange: action("sort change"),
+};
+SortExample.storyName = "排序";
 
 // 9. 分组
 const GroupRow = styled.div`
@@ -302,3 +337,44 @@ MultiGroupExample.args = {
   stickyHeaderClassName: "left-sticky-header",
 };
 MultiGroupExample.storyName = "多层分组";
+
+// 11. 列宽调整
+export const ResizeColumnExample = Template.bind({});
+ResizeColumnExample.args = {
+  header: true,
+  width: 800,
+  height: 400,
+  columns: columnsList.map((key) => ({ title: renderHeaderCell, dataIndex: key, width: 140, resizer: ["a", "b"].includes(key) })),
+  rawData: new Array(50).fill(null).map((v, index) => {
+    let row = { id: `${index}` };
+
+    columnsList.forEach((key) => (row[key] = `${index}_${key}`));
+
+    return row;
+  }),
+  onChange: action("column width change"),
+};
+ResizeColumnExample.storyName = "列宽调整";
+
+// 12. 位置调整
+export const RepositionColumnExample = Template.bind({});
+RepositionColumnExample.args = {
+  header: true,
+  width: 800,
+  height: 400,
+  columns: columnsList.map((key) => ({
+    title: renderHeaderCell,
+    dataIndex: key,
+    width: 140,
+    reposition: ["a", "b", "c", "d", "e"].includes(key),
+  })),
+  rawData: new Array(50).fill(null).map((v, index) => {
+    let row = { id: `${index}` };
+
+    columnsList.forEach((key) => (row[key] = `${index}_${key}`));
+
+    return row;
+  }),
+  onChange: action("position change"),
+};
+RepositionColumnExample.storyName = "位置调整";

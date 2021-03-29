@@ -8,14 +8,16 @@
 import React, { useCallback, forwardRef, createContext, ReactElement, useMemo, ForwardedRef } from "react";
 import { VariableSizeGrid as Grid } from "react-window";
 import { IProps, IHeadersStyle, IStickyContext } from "./interfaces";
-import { getRenderedCursor, headerBuilder, columnsBuilder, usePreprocess, preprocessRawData, useRespond } from "./helper";
+import { getRenderedCursor, headerBuilder, columnsBuilder, preprocessRawData } from "./helper";
+import { usePreprocess, useRespond, useInitialScroll } from "./hooks";
 import Cell from "./Cell";
-import StickyHeader from "./StickyHeader";
+import StickyHeader from "./StickyHeader/Component";
 import StickyColumns from "./StickyColumns";
 
 const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...rest }, ref) => (
   <StickyGridContext.Consumer>
     {({
+      height,
       innerClassName,
       bodyClassName,
       stickyBodyClassName,
@@ -35,6 +37,7 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
       placeholder,
       childrenRawName,
       groupRowRender,
+      onChange,
     }) => {
       // If useIsScrolling is enabled for this grid, children's props receives an additional isScrolling boolean prop
       const isScrolling = children.length > 0 ? children[0].props.isScrolling : false;
@@ -89,6 +92,7 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
         <div className={innerClassName} ref={ref} {...{ ...rest, style: containerStyle }}>
           {isHeader ? (
             <StickyHeader
+              tableHeight={height}
               columns={columns}
               stickyHeaderColumns={stickyHeaderColumns}
               headerColumns={nonStickyHeaderColumns}
@@ -96,6 +100,7 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
               stickyWidth={stickyWidth}
               stickyClassName={stickyHeaderClassName}
               className={headerClassName}
+              onChange={onChange}
             />
           ) : null}
           {/* 固定列 */}
@@ -133,6 +138,7 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
 ));
 
 const StickyGridContext = createContext<IStickyContext>({
+  height: 0,
   stickyHeight: 0,
   stickyWidth: 0,
   nonStrickyWidth: 0,
@@ -164,16 +170,12 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Gri
     outerRef,
     innerRef,
     direction,
-    columnWidth,
-    rowHeight,
     columns,
     rawData,
     height,
     width,
-    onScroll,
     header,
     placeholder,
-    itemKey,
     initialScrollLeft,
     initialScrollTop,
     overscanColumnCount,
@@ -182,8 +184,14 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Gri
     useStickyIsScrolling,
     useIsScrolling,
     childrenRawName = "children",
-
+    columnWidth,
+    rowHeight,
+    onScroll,
+    onChange,
+    itemKey,
     groupRowRender,
+    initialScrollRowIndex,
+    initialScrollColumnIndex,
 
     className = "",
     innerClassName = "",
@@ -248,9 +256,23 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Gri
   const _columnWidth = useCallback((index) => columnWidthCache[index + stickyColumnsCount], [columnWidthCache, stickyColumnsCount]),
     _rowHegiht = useCallback((index) => rowHeightCache[index], [rowHeightCache]);
 
+  // 初始化偏移
+  const { _initialScrollLeft, _initialScrollTop } = useInitialScroll({
+    initialScrollLeft,
+    initialScrollTop,
+    initialScrollRowIndex,
+    initialScrollColumnIndex,
+    columns,
+    stickyColumnsCount,
+    flatRawData,
+    columnWidthCache,
+    rowHeightCache,
+  });
+
   return (
     <StickyGridContext.Provider
       value={{
+        height,
         stickyHeight,
         stickyWidth,
         nonStrickyWidth,
@@ -271,6 +293,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Gri
         // func
         placeholder,
         groupRowRender,
+        onChange,
       }}
     >
       <Grid
@@ -295,8 +318,8 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Gri
         columnWidth={_columnWidth}
         rowHeight={_rowHegiht}
         useIsScrolling={useIsScrolling}
-        initialScrollLeft={initialScrollLeft}
-        initialScrollTop={initialScrollTop}
+        initialScrollLeft={_initialScrollLeft}
+        initialScrollTop={_initialScrollTop}
         overscanColumnCount={overscanColumnCount}
         overscanRowCount={overscanRowCount}
         innerElementType={innerGridElementType}

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { VariableSizeGrid } from "react-window";
 
 interface IPreprocess {
-  groupRowHeight: ((raw: IRawItem, index: number) => number) | number;
+  groupRowHeight: ((index: number, raw: IRawItem) => number) | number;
   cellHeight: number;
   cellWidth: number;
   rawData: IRawItem[];

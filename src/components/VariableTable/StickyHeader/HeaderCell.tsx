@@ -2,7 +2,7 @@
  * @Author: sun.t
  * @Date: 2021-03-27 17:37:50
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-03-27 21:50:29
+ * @Last Modified time: 2021-03-31 17:56:02
  */
 import React, { CSSProperties, memo } from "react";
 import { areEqual } from "react-window";
@@ -23,9 +23,11 @@ interface IMemoCellProp {
   style: ICellStyle;
   column: IVariableColumn;
   dataIndex: string;
+  isDraging: boolean;
   onSort: (dataIndex: string, order: "ascend" | "descend" | undefined, column: IVariableColumn) => void;
   onResize: (dataIndex: string, width: number, column: IVariableColumn) => void;
   onReposition: (from: string, to: string, position: "front" | "back") => void;
+  toggleDragState: (isDraging: boolean) => void;
 }
 
 const Cell = styled.div`
@@ -35,41 +37,57 @@ const Cell = styled.div`
 `;
 
 // 缓存包装
-const Component = memo(({ tableHeight, style, column, dataIndex, onSort, onResize, onReposition }: IMemoCellProp) => {
-  const { title, sorter, sortOrder, resizer, reposition } = column;
+const Component = memo(
+  ({ tableHeight, style, column, dataIndex, isDraging, onSort, onResize, onReposition, toggleDragState }: IMemoCellProp) => {
+    const { title, sorter, sortOrder, resizer, reposition } = column;
 
-  const child = typeof title === "function" ? title({ dataIndex, column }) : title || "";
+    const child = typeof title === "function" ? title({ dataIndex, column }) : title || "";
 
-  const _style: CSSProperties = {
-    position: "absolute",
-    ...style,
-  };
+    const _style: CSSProperties = {
+      position: "absolute",
+      ...style,
+    };
 
-  if (!reposition) {
-    _style.display = "flex";
-    _style.flexDirection = "row";
-  }
+    if (!reposition) {
+      _style.display = "flex";
+      _style.flexDirection = "row";
+    }
 
-  const Wrapper = reposition ? DragWrapper : ({ style, children }: ICellProps) => <div style={style}>{children}</div>;
+    const Wrapper = reposition
+      ? DragWrapper
+      : ({ style, children, isDraging }: ICellProps) => {
+          // 不可拖拽单元样式
+          let dragingStyle: CSSProperties = {};
+          if (isDraging) {
+            dragingStyle.filter = "grayscale(80%)";
+          }
 
-  return (
-    <Wrapper style={_style} column={column} onReposition={onReposition}>
-      {child}
+          return <div style={{ ...style, ...dragingStyle }}>{children}</div>;
+        };
 
-      {sorter ? (
-        <Sort sortOrder={sortOrder} onSort={(_sortOrder) => onSort(dataIndex, sortOrder === _sortOrder ? undefined : _sortOrder, column)} />
-      ) : null}
+    return (
+      <Wrapper style={_style} column={column} onReposition={onReposition} toggleDragState={toggleDragState} isDraging={isDraging}>
+        {child}
 
-      {resizer ? (
-        <Resizer
-          style={{
-            height: tableHeight,
-          }}
-          onDragEnd={({ translation: { x } }) => onResize(dataIndex, x, column)}
-        />
-      ) : null}
-    </Wrapper>
-  );
-}, areEqual);
+        {sorter ? (
+          <Sort
+            sortOrder={sortOrder}
+            onSort={(_sortOrder) => onSort(dataIndex, sortOrder === _sortOrder ? undefined : _sortOrder, column)}
+          />
+        ) : null}
+
+        {resizer ? (
+          <Resizer
+            style={{
+              height: tableHeight,
+            }}
+            onDragEnd={({ translation: { x } }) => onResize(dataIndex, x, column)}
+          />
+        ) : null}
+      </Wrapper>
+    );
+  },
+  areEqual
+);
 
 export default Component;

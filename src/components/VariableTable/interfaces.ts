@@ -2,7 +2,7 @@
  * @Author: sun.t
  * @Date: 2020-09-16 09:35:50
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-03-29 20:26:34
+ * @Last Modified time: 2021-04-20 10:38:56
  */
 import { VariableSizeGrid, GridOnScrollProps } from "react-window";
 import { ReactNode, Ref } from "react";
@@ -17,8 +17,8 @@ export interface IVariableColumn<RecordType = any> {
   fixed?: boolean;
   sortOrder?: "ascend" | "descend" | false;
   sorter?: boolean;
-  resizer?:boolean;
-  reposition?:boolean;
+  resizer?: boolean;
+  reposition?: boolean;
   render?: ({
     columnIndex,
     rowIndex,
@@ -42,7 +42,23 @@ export interface IVariableColumn<RecordType = any> {
 //   baseRender: () => ReactNode;
 // }
 
-export type TPlaceholder = ReactNode | (({ columnIndex, rowIndex }: { columnIndex: number; rowIndex: number }) => ReactNode);
+export type TPlaceholder<RecordType = any> =
+  | ReactNode
+  | (({
+      columnIndex,
+      rowIndex,
+      dataIndex,
+      record,
+      column,
+      value
+    }: {
+      columnIndex: number;
+      rowIndex: number;
+      record: RecordType;
+      column: IVariableColumn;
+      dataIndex: string;
+      value:any
+    }) => ReactNode);
 
 type TRowRender = ({ columnIndex, data }: { columnIndex: number; data: TObject; width: number }) => ReactNode;
 
@@ -72,6 +88,14 @@ export type TOnChange = ({
   action: "sort" | "resizeColumn" | "repositionColumn";
 }) => void;
 
+export interface VariableTable<RecordType> {
+  rawData: IRawItem[];
+  columns: IVariableColumn<RecordType>[];
+  rowHeight?: (index: number) => number;
+  columnWidth: (index: number) => number;
+  grid: VariableSizeGrid | null;
+}
+
 export interface IProps<RecordType> {
   ref?: Ref<VariableSizeGrid>;
   outerRef?: Ref<HTMLElement>;
@@ -99,7 +123,6 @@ export interface IProps<RecordType> {
   stickyBodyClassName?: string;
   headerClassName?: string;
   stickyHeaderClassName?: string;
-  useStickyIsScrolling?: boolean;
   useIsScrolling?: boolean;
   overscanColumnCount?: number;
   overscanRowCount?: number;
@@ -108,12 +131,13 @@ export interface IProps<RecordType> {
 }
 
 export interface IStickyContext {
-  height:number;
+  height: number;
   stickyHeight: number; // 冻结行总高度
   stickyWidth: number; // 冻结列总宽度
   nonStrickyWidth: number; // 非冻结列总宽度
   columns: IVariableColumn[]; // 原始列
   stickyColumnsCount: number; // 冻结列数量
+  nonStrickyColumnsCount: number; // 非冻结列数量
   // nonStrickyColumnsCount: number; // 非冻结列
   columnLeftCache: number[]; // 每列position:left集合
   columnWidthCache: number[]; // 调用columnWidth结果集合
@@ -129,7 +153,6 @@ export interface IStickyContext {
   // columnWidth?: (index: number) => number;
   // rowHeight?: (index: number) => number;
   placeholder?: TPlaceholder;
-  useStickyIsScrolling?: boolean;
   groupRowRender?: TRowRender;
   onChange?: TOnChange;
 }
@@ -183,13 +206,6 @@ export interface IPreproccessProps<RecordType> {
   header?: boolean | number;
   columns: IVariableColumn<RecordType>[];
   columnWidth?: (index: number) => number;
-}
-
-export interface IPlaceholderProps {
-  style: CSSProperties;
-  placeholder: TPlaceholder;
-  columnIndex: number;
-  rowIndex: number;
 }
 
 export interface IInitialScrollProps<RecordType> {

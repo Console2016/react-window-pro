@@ -5,6 +5,7 @@ interface IProps {
   column: IVariableColumn;
   dataIndex: string;
   onReposition: (from: string, to: string, position: "front" | "back") => void;
+  toggleDragState: (isDraging: boolean) => void;
 }
 
 interface IDragingState {
@@ -33,19 +34,31 @@ function restore(e: any) {
   }
 }
 
-function useDrag({ column, dataIndex, onReposition }: IProps) {
-  const onDragStart = useCallback((e) => {
-    e.dataTransfer.setData("Text", dataIndex);
+function useDrag({ column, dataIndex, onReposition, toggleDragState }: IProps) {
+  const onDragStart = useCallback(
+    (e) => {
+      e.dataTransfer.setData("Text", dataIndex);
 
-    const { x, y } = e.target.getBoundingClientRect();
+      const { x, y } = e.target.getBoundingClientRect();
 
-    dragingState = { dataIndex, position: { x, y } };
-  }, []);
+      e.dataTransfer.effectAllowed = "move";
 
-  const onDragEnd = useCallback((e) => {
-    // 恢复
-    e.currentTarget.firstChild.style.transform = "none";
-  }, []);
+      dragingState = { dataIndex, position: { x, y } };
+
+      toggleDragState && toggleDragState(true);
+    },
+    [toggleDragState]
+  );
+
+  const onDragEnd = useCallback(
+    (e) => {
+      // 恢复
+      e.currentTarget.firstChild.style.transform = "none";
+
+      toggleDragState && toggleDragState(false);
+    },
+    [toggleDragState]
+  );
 
   const onDragEnter = useCallback((e) => {
     // 阻止浏览器默认行为
@@ -71,6 +84,8 @@ function useDrag({ column, dataIndex, onReposition }: IProps) {
 
   const onDragOver = useCallback((e) => {
     e.preventDefault(); //取消dragover的默认行为
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move"
     const dataIndex = e.currentTarget.getAttribute("data-dataindex");
     if (dragingState.dataIndex === dataIndex) {
       return;
@@ -79,23 +94,28 @@ function useDrag({ column, dataIndex, onReposition }: IProps) {
     transform(e);
   }, []);
 
-  const onDrop = useCallback((e) => {
-    const { clientX, clientY, currentTarget, dataTransfer } = e;
+  const onDrop = useCallback(
+    (e) => {
+      const { clientX, clientY, currentTarget, dataTransfer } = e;
 
-    const { x, y, width } = currentTarget.getBoundingClientRect();
+      const { x, y, width } = currentTarget.getBoundingClientRect();
 
-    const dragDataIndex = dataTransfer.getData("Text");
+      const dragDataIndex = dataTransfer.getData("Text");
 
-    const dataIndex = currentTarget.getAttribute("data-dataindex");
+      const dataIndex = currentTarget.getAttribute("data-dataindex");
 
-    if (dragDataIndex === dataIndex) {
-      return;
-    }
+      toggleDragState && toggleDragState(false);
 
-    onReposition && onReposition(dragDataIndex, dataIndex, clientX - x > width / 2 ? "back" : "front");
+      if (dragDataIndex === dataIndex) {
+        return;
+      }
 
-    restore(e);
-  }, []);
+      onReposition && onReposition(dragDataIndex, dataIndex, clientX - x > width / 2 ? "back" : "front");
+
+      restore(e);
+    },
+    [toggleDragState]
+  );
 
   return {
     onDragStart,

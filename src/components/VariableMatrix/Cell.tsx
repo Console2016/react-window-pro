@@ -1,4 +1,4 @@
-import React, { CSSProperties, memo } from "react";
+import React, { CSSProperties, memo, useRef } from "react";
 import styled from "styled-components";
 import { areEqual } from "react-window";
 import Placeholder from "./Placeholder";
@@ -30,27 +30,37 @@ const Component = ({
   cellRender,
 }: IProps) => {
   const { id } = data;
+  const isRendered = useRef(false);
 
-  if (showPlaceholder) {
-    return <Placeholder style={style} placeholder={placeholder} columnIndex={columnIndex} rowIndex={rowIndex} data={data} />;
+  const renderCell = () => {
+    if (isGroupCell) {
+      return <Cell style={style}>{groupRowRender ? groupRowRender({ rowIndex, columnIndex, data, style }) : id}</Cell>;
+    }
+
+    return (
+      <Cell style={style}>
+        {cellRender
+          ? cellRender({
+              columnIndex,
+              rowIndex,
+              data,
+              style,
+            })
+          : id}
+      </Cell>
+    );
+  };
+
+  if (isRendered.current) {
+    return renderCell();
+  } else {
+    if (showPlaceholder) {
+      return <Placeholder style={style} placeholder={placeholder} columnIndex={columnIndex} rowIndex={rowIndex} data={data} />;
+    } else {
+      isRendered.current = true;
+      return renderCell();
+    }
   }
-
-  if (isGroupCell) {
-    return <Cell style={style}>{groupRowRender ? groupRowRender({ rowIndex, columnIndex, data, style }) : id}</Cell>;
-  }
-
-  return (
-    <Cell style={style}>
-      {cellRender
-        ? cellRender({
-            columnIndex,
-            rowIndex,
-            data,
-            style,
-          })
-        : id}
-    </Cell>
-  );
 };
 
 export default memo(Component, areEqual);

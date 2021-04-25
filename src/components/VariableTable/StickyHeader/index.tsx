@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 import HeaderCell from "./HeaderCell";
 import { IStickyHeaderProps } from "../interfaces";
@@ -90,6 +90,8 @@ const StickyHeader = ({
     [columns, onChange]
   );
 
+  const [isDraging, setIsDraging] = useState(false);
+
   return (
     <Container>
       {/* 冻结列头 */}
@@ -101,12 +103,14 @@ const StickyHeader = ({
               <HeaderCell
                 style={style}
                 key={dataIndex}
+                isDraging={isDraging}
                 column={columns[index]}
                 dataIndex={dataIndex}
                 onSort={onSortCallback}
                 onResize={onResizeCallback}
                 onReposition={onRepositionCallback}
                 tableHeight={tableHeight}
+                toggleDragState={setIsDraging}
               />
             );
           })}
@@ -121,12 +125,14 @@ const StickyHeader = ({
             <HeaderCell
               style={style}
               key={dataIndex}
+              isDraging={isDraging}
               column={columns[columnIndex]}
               dataIndex={dataIndex}
               onSort={onSortCallback}
               onResize={onResizeCallback}
               onReposition={onRepositionCallback}
               tableHeight={tableHeight}
+              toggleDragState={setIsDraging}
             />
           );
         })}

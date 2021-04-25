@@ -1,6 +1,6 @@
 import { IRawItem, TRowHeight } from "./interfaces";
 import { calculate } from "./helper";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { VariableSizeGrid } from "react-window";
 
 interface IPreprocess {
@@ -12,37 +12,41 @@ interface IPreprocess {
   width: number;
 }
 export function usePreprocess({ groupRowHeight, rawData, cellHeight, cellWidth, childrenRawName, width }: IPreprocess) {
-  if (!rawData.length) {
+  const result = useMemo(() => {
+    if (!rawData.length) {
+      return {
+        columnCount: 0,
+        rowCount: 0,
+        positionMap: {},
+        positionCache: {},
+        rowHeightCache: {},
+        groupStyleMap: {},
+      };
+    }
+
+    let columnCount = Math.floor(width / cellWidth);
+
+    const { positionMap, positionCache, rowCursor, rowHeightCache, groupStyleMap } = calculate({
+      rawData,
+      columnCount,
+      cellHeight,
+      cellWidth,
+      childrenRawName,
+      groupRowHeight,
+    });
+
     return {
-      columnCount: 0,
-      rowCount: 0,
-      positionMap: {},
-      positionCache: {},
-      rowHeightCache: {},
-      groupStyleMap: {},
+      columnCount,
+      rowCount: rowCursor + 1,
+      positionMap,
+      positionCache,
+      rowHeightCache,
+      // groupStyle,
+      groupStyleMap,
     };
-  }
+  }, [groupRowHeight, rawData, cellHeight, cellWidth, childrenRawName, width]);
 
-  let columnCount = Math.floor(width / cellWidth);
-
-  const { positionMap, positionCache, rowCursor, rowHeightCache, groupStyleMap } = calculate({
-    rawData,
-    columnCount,
-    cellHeight,
-    cellWidth,
-    childrenRawName,
-    groupRowHeight,
-  });
-
-  return {
-    columnCount,
-    rowCount: rowCursor + 1,
-    positionMap,
-    positionCache,
-    rowHeightCache,
-    // groupStyle,
-    groupStyleMap,
-  };
+  return result;
 }
 
 export function useRespond({ rowHeightCache, cellWidth }: { rowHeightCache: TRowHeight; cellWidth: number }) {

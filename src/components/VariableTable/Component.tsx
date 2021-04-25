@@ -2,16 +2,16 @@
  * @Author: sun.t
  * @Date: 2020-09-14 15:50:04
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-02-20 14:36:40
+ * @Last Modified time: 2021-04-20 14:54:08
  * @remark: 1. rawData发生变化会导致所有高度缓存刷新
  */
-import React, { useCallback, forwardRef, createContext, ReactElement, useMemo, ForwardedRef } from "react";
-import { VariableSizeGrid as Grid } from "react-window";
-import { IProps, IHeadersStyle, IStickyContext } from "./interfaces";
+import React, { useCallback, forwardRef, createContext, ReactElement, useMemo, ForwardedRef, useImperativeHandle } from "react";
+import { VariableSizeGrid } from "react-window";
+import { IProps, IHeadersStyle, IStickyContext, VariableTable } from "./interfaces";
 import { getRenderedCursor, headerBuilder, columnsBuilder, preprocessRawData } from "./helper";
 import { usePreprocess, useRespond, useInitialScroll } from "./hooks";
-import Cell from "./Cell";
-import StickyHeader from "./StickyHeader/Component";
+import ScrollCell from "./ScrollCell";
+import StickyHeader from "./StickyHeader";
 import StickyColumns from "./StickyColumns";
 
 const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...rest }, ref) => (
@@ -30,10 +30,10 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
       columnLeftCache,
       columnWidthCache,
       stickyColumnsCount,
+      nonStrickyColumnsCount,
       rowHeightCache,
       rowTopCache,
       rawData,
-      useStickyIsScrolling,
       placeholder,
       childrenRawName,
       groupRowRender,
@@ -62,8 +62,8 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
         });
         // 计算非冻结列头位置
         nonStickyHeaderColumns = headerBuilder({
-          minColumn,
-          maxColumn,
+          minColumn: Number.isFinite(minColumn) ? minColumn : 0,
+          maxColumn: Number.isFinite(maxColumn) ? maxColumn : nonStrickyColumnsCount - 1,
           stickyHeight,
           columnLeftCache,
           columnWidthCache,
@@ -116,7 +116,6 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
               className={stickyBodyClassName}
               isScrolling={isScrolling}
               placeholder={placeholder}
-              useIsScrolling={useStickyIsScrolling}
               groupRowRender={groupRowRender}
               childrenRawName={childrenRawName}
             />
@@ -144,6 +143,7 @@ const StickyGridContext = createContext<IStickyContext>({
   nonStrickyWidth: 0,
   columns: [],
   stickyColumnsCount: 0,
+  nonStrickyColumnsCount: 0,
   columnLeftCache: [],
   columnWidthCache: [],
   rowHeightCache: [],
@@ -163,9 +163,9 @@ const StickyGridContext = createContext<IStickyContext>({
  * 注意点
  * 1.冻结列请给定宽度
  * @param param0
- * @interface const Component: <RecordType>(props: IProps<RecordType>, ref?: React.Ref<Grid>) => ReactElement | null = (props, ref) => {};
+ * @interface const Component: <RecordType>(props: IProps<RecordType>, ref?: React.Ref<VariableSizeGrid>) => ReactElement | null = (props, ref) => {};
  */
-function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Grid>): ReactElement | null {
+function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<VariableTable<RecordType>>): ReactElement | null {
   const {
     outerRef,
     innerRef,
@@ -181,7 +181,6 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Gri
     overscanColumnCount,
     overscanRowCount,
     style,
-    useStickyIsScrolling,
     useIsScrolling,
     childrenRawName = "children",
     columnWidth,
@@ -200,6 +199,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Gri
     headerClassName = "",
     stickyHeaderClassName = "",
   } = props;
+
   // 预计算
   const {
     stickyHeight,
@@ -209,6 +209,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Gri
     nonStrickyColumnsCount,
     columnLeftCache,
     columnWidthCache,
+    avergeColumnWidth,
   } = useMemo(
     () => usePreprocess<RecordType>({ header, columns, columnWidth }),
     [header, columns, columnWidth]
@@ -225,8 +226,6 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Gri
     [rawData, rowHeight, columns.length, childrenRawName]
   );
 
-  const refCache = useRespond({ columns, columnWidth, rowHeightCache });
-
   // 单元格渲染
   const GridCell = useCallback(
     ({ columnIndex, rowIndex, style, data, isScrolling }) => {
@@ -238,14 +237,14 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Gri
       }
 
       return (
-        <Cell
-          columnIndex={columnIndex + stickyColumnsCount}
-          rowIndex={rowIndex}
-          style={style}
-          column={columns[stickyColumnsCount + columnIndex]}
-          data={row}
-          showPlaceholder={isScrolling && placeholder}
+        <ScrollCell
+          isScrolling={isScrolling}
           placeholder={placeholder}
+          style={style}
+          columnIndex={columnIndex}
+          rowIndex={rowIndex}
+          column={columns[stickyColumnsCount + columnIndex]}
+          record={row}
         />
       );
     },
@@ -269,6 +268,23 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Gri
     rowHeightCache,
   });
 
+  const refCache = useRespond({ columns, columnWidth, rowHeightCache });
+
+  // 构建对外ref
+  useImperativeHandle(
+    ref,
+    () => {
+      return {
+        columns,
+        rawData,
+        columnWidth: _columnWidth,
+        rowHeight: _rowHegiht,
+        grid: refCache.current,
+      };
+    },
+    [columns, _columnWidth, _rowHegiht, rawData]
+  );
+
   return (
     <StickyGridContext.Provider
       value={{
@@ -278,11 +294,11 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Gri
         nonStrickyWidth,
         columns,
         stickyColumnsCount,
+        nonStrickyColumnsCount,
         columnLeftCache,
         columnWidthCache,
         rowHeightCache,
         rowTopCache,
-        useStickyIsScrolling,
         innerClassName,
         bodyClassName,
         stickyBodyClassName,
@@ -296,15 +312,8 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Gri
         onChange,
       }}
     >
-      <Grid
-        ref={(e: Grid) => {
-          refCache.current = e;
-          if (typeof ref === "function") {
-            ref(e);
-          } else {
-            ref && (ref.current = e);
-          }
-        }}
+      <VariableSizeGrid
+        ref={refCache}
         outerRef={outerRef}
         innerRef={innerRef}
         direction={direction}
@@ -323,6 +332,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Gri
         overscanColumnCount={overscanColumnCount}
         overscanRowCount={overscanRowCount}
         innerElementType={innerGridElementType}
+        estimatedColumnWidth={avergeColumnWidth} // 冻结列横向滚动条当数据为空时异常,整体宽度计算错误; 数据回空时会使用该值估算宽度,默认为50
         // outerElementType
         itemKey={itemKey}
         onScroll={(props) => {
@@ -338,11 +348,11 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Gri
           visibleRowStartIndex,
           visibleRowStopIndex,
         }) => {
-          console.log("item render");
+          // console.log("item render");
         }}
       >
         {GridCell}
-      </Grid>
+      </VariableSizeGrid>
     </StickyGridContext.Provider>
   );
 }

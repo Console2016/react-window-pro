@@ -80,10 +80,14 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Mat
 
   const _width = width - scrollbarSize;
 
-  const { columnCount, rowCount, positionMap, positionCache, rowHeightCache, groupStyleMap } = useMemo(
-    () => usePreprocess({ groupRowHeight, rawData, cellHeight, cellWidth, childrenRawName, width: _width }),
-    [rawData, groupRowHeight, cellHeight, cellWidth, childrenRawName, _width]
-  );
+  const { columnCount, rowCount, positionMap, positionCache, rowHeightCache, groupStyleMap } = usePreprocess({
+    groupRowHeight,
+    rawData,
+    cellHeight,
+    cellWidth,
+    childrenRawName,
+    width: _width,
+  });
 
   const refCache = useRespond({ rowHeightCache, cellWidth });
 

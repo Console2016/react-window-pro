@@ -2,12 +2,12 @@
  * @Author: sun.t
  * @Date: 2021-01-16 11:37:02
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-01-17 00:32:07
+ * @Last Modified time: 2021-04-20 14:18:55
  */
 import React from "react";
-import { IStickyColumnsProps } from "./interfaces";
+import { IStickyColumnsProps } from "../interfaces";
 import styled from "styled-components";
-import Cell from "./Cell";
+import ScrollCell from "../ScrollCell";
 
 const Container = styled.div`
   position: sticky;
@@ -62,14 +62,14 @@ const StickyColumns = ({
             {childrensPlaceholder.map((ph: any, index: number) => {
               const width = columnWidthCache[index];
               return (
-                <Cell
+                <ScrollCell
                   key={index}
                   style={{ width }}
                   columnIndex={index}
                   rowIndex={rowIndex}
                   column={columns[index]}
-                  data={row}
-                  showPlaceholder={isScrolling && useIsScrolling}
+                  record={row}
+                  isScrolling={isScrolling}
                   placeholder={placeholder}
                 />
               );

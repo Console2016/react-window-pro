@@ -2,15 +2,22 @@ import React from "react";
 import useDrag from "./hooks/useDrag";
 import { ICellProps } from "./interfaces";
 
-const Component = ({ style, children, column,onReposition }: ICellProps) => {
+const Component = ({ style, children, column, onReposition, toggleDragState }: ICellProps) => {
   const { dataIndex } = column;
 
-  const { onDragStart, onDragEnd, onDragEnter, onDragLeave, onDragOver, onDrop } = useDrag({ column, dataIndex, onReposition });
+  const { onDragStart, onDragEnd, onDragEnter, onDragLeave, onDragOver, onDrop } = useDrag({
+    column,
+    dataIndex,
+    onReposition,
+    toggleDragState,
+  });
+
+  const _style = { ...style, cursor: "grab" };
 
   return (
     <div
       data-dataindex={dataIndex}
-      style={style}
+      style={_style}
       draggable="true"
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}

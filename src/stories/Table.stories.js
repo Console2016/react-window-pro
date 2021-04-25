@@ -129,6 +129,7 @@ CustomClassExample.args = {
 
     return row;
   }),
+  // rawData:[],
   stickyBodyClassName: "left-sticky-body",
   bodyClassName: "right-sticky-body",
   headerClassName: "right-sticky-header",
@@ -136,13 +137,13 @@ CustomClassExample.args = {
 };
 CustomClassExample.storyName = "自定义样式";
 
-// 5. 骨架优化
+// 5. 延缓加载
 export const SkeletonExample = Template.bind({});
 SkeletonExample.args = {
   header: false,
   width: 800,
   height: 400,
-  columns: columnsList.map((key, index) => ({ title: key, dataIndex: key, width: 140, fixed: index < 3 })),
+  columns: columnsList.map((key, index) => ({ title: key, dataIndex: key, width: 140, fixed: index < 3, render: renderCell })),
   rawData: new Array(1000).fill(null).map((v, index) => {
     let row = { id: `${index}` };
 
@@ -154,7 +155,7 @@ SkeletonExample.args = {
   useIsScrolling: true,
   useStickyIsScrolling: true,
 };
-SkeletonExample.storyName = "骨架优化";
+SkeletonExample.storyName = "延缓加载";
 
 // 6. 初始化偏移[偏移量]
 export const InitialOffsetExample = Template.bind({});
@@ -201,7 +202,7 @@ export const ScrollExample = () => (
     <div>
       <button
         onClick={() => {
-          ScrollGridRef.current.scrollToItem({
+          ScrollGridRef.current.grid.scrollToItem({
             align: "start",
             rowIndex: 100,
           });
@@ -211,7 +212,7 @@ export const ScrollExample = () => (
       </button>
       <button
         onClick={() => {
-          ScrollGridRef.current.scrollToItem({
+          ScrollGridRef.current.grid.scrollToItem({
             align: "start",
             columnIndex: 10,
             rowIndex: 100,
@@ -254,7 +255,13 @@ SortExample.args = {
   header: true,
   width: 800,
   height: 400,
-  columns: columnsList.map((key) => ({ title: renderHeaderCell, dataIndex: key, width: 140, sorter: !["a", "b"].includes(key) })),
+  columns: columnsList.map((key) => ({
+    title: renderHeaderCell,
+    dataIndex: key,
+    width: 140,
+    sorter: !["a", "b"].includes(key),
+    sortOrder: key === "c" ? "descend" : undefined,
+  })),
   rawData: new Array(50).fill(null).map((v, index) => {
     let row = { id: `${index}` };
 
@@ -365,7 +372,7 @@ RepositionColumnExample.args = {
   columns: columnsList.map((key) => ({
     title: renderHeaderCell,
     dataIndex: key,
-    width: 140,
+    width: 60,
     reposition: ["a", "b", "c", "d", "e"].includes(key),
   })),
   rawData: new Array(50).fill(null).map((v, index) => {

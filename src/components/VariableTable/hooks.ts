@@ -18,7 +18,7 @@ export function useRespond<RecordType>({
   columnWidth?: (index: number) => number;
   rowHeightCache: number[];
 }) {
-  const ref = useRef<VariableSizeGrid>();
+  const ref = useRef<VariableSizeGrid>(null);
 
   // 宽度发生变化,重置缓存
   useEffect(() => {
@@ -91,6 +91,8 @@ export function usePreprocess<RecordType>({ header, columns, columnWidth }: IPre
     (totalWidth, column, index) => totalWidth + columnWidthCache[index + stickyColumns.length],
     0
   );
+  // 非冻结列平均列宽
+  const avergeColumnWidth = Math.ceil(nonStrickyWidth / nonStrickyColumns.length);
 
   // 计算所有列left偏移量
   const columnLeftCache = columns.reduce(
@@ -112,6 +114,7 @@ export function usePreprocess<RecordType>({ header, columns, columnWidth }: IPre
     nonStrickyColumnsCount: nonStrickyColumns.length,
     columnLeftCache,
     columnWidthCache,
+    avergeColumnWidth,
   };
 }
 

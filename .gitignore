@@ -4,4 +4,5 @@ dist
 es
 lib
 .gitignore
+storybook-static
 typings

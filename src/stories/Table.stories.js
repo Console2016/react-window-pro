@@ -387,7 +387,6 @@ RepositionColumnExample.args = {
   onChange: action("position change"),
 };
 RepositionColumnExample.storyName = "位置调整";
-<<<<<<< HEAD
 
 // 13. bug test
 export const BugTest = () => {
@@ -428,5 +427,3 @@ export const BugTest = () => {
   );
 };
 BugTest.storyName = "Bug测试";
-=======
->>>>>>> 91fd8ce2b460cbce7528c3ac26d1ac3303602634

@@ -6,7 +6,7 @@ const Component = ({ style, children, column, onReposition, toggleDragState }: I
   const { dataIndex } = column;
 
   const { onDragStart, onDragEnd, onDragEnter, onDragLeave, onDragOver, onDrop } = useDrag({
-    column,
+    // column,
     dataIndex,
     onReposition,
     toggleDragState,

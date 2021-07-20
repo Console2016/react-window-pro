@@ -32,6 +32,7 @@ const StickyHeader = ({
   tableHeight,
   stickyHeight,
   stickyWidth,
+  nonStrickyWidth,
   stickyHeaderColumns,
   headerColumns,
   columns,
@@ -39,7 +40,7 @@ const StickyHeader = ({
   className,
   onChange,
 }: IStickyHeaderProps) => {
-  const scrollableStyle = { left: stickyWidth };
+  const scrollableStyle = { left: stickyWidth, width: nonStrickyWidth, height: stickyHeight };
 
   const onSortCallback = useCallback(
     (dataIndex, order, column) => {

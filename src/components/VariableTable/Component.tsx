@@ -98,6 +98,7 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
               headerColumns={nonStickyHeaderColumns}
               stickyHeight={stickyHeight}
               stickyWidth={stickyWidth}
+              nonStrickyWidth={nonStrickyWidth}
               stickyClassName={stickyHeaderClassName}
               className={headerClassName}
               onChange={onChange}

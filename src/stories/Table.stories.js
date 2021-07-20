@@ -1,4 +1,4 @@
-import React, { createRef, Fragment, useEffect } from "react";
+import React, { createRef, Fragment, useEffect, useState } from "react";
 import VariableTable from "../components/VariableTable";
 import { Modal } from "antd";
 import styled from "styled-components";
@@ -390,22 +390,26 @@ RepositionColumnExample.storyName = "位置调整";
 
 // 13. bug test
 export const BugTest = () => {
-  useEffect(() => {
-    setTimeout(() => {
-      Modal.info({
-        title: "This is a notification message",
-        content: (
-          <div>
-            <p>some messages...some messages...</p>
-            <p>some messages...some messages...</p>
-          </div>
-        ),
-        onOk() {},
-        keyboard: true,
-      });
-    }, 10000),
-      [];
-  });
+  const [columns, setColumns] = useState(
+    columnsList.map((key) => ({ title: renderHeaderCell, dataIndex: key, width: 140, resizer: ["a", "b"].includes(key), sorter:true, reposition:true }))
+  );
+
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     Modal.info({
+  //       title: "This is a notification message",
+  //       content: (
+  //         <div>
+  //           <p>some messages...some messages...</p>
+  //           <p>some messages...some messages...</p>
+  //         </div>
+  //       ),
+  //       onOk() {},
+  //       keyboard: true,
+  //     });
+  //   }, 10000),
+  //     [];
+  // });
 
   return (
     <Container>
@@ -413,7 +417,7 @@ export const BugTest = () => {
         header={true}
         width={800}
         height={400}
-        columns={columnsList.map((key) => ({ title: renderHeaderCell, dataIndex: key, width: 140, resizer: ["a", "b"].includes(key) }))}
+        columns={columns}
         rawData={new Array(50).fill(null).map((v, index) => {
           let row = { id: `${index}` };
 
@@ -421,7 +425,15 @@ export const BugTest = () => {
 
           return row;
         })}
-        onChange={action("column width change")}
+        onChange={({ sorter, columnSize, columnPosition, action }) => {
+          if (action === "sort") {
+            setColumns(sorter.columns);
+          } else if (action === "resizeColumn") {
+            setColumns(columnSize.columns);
+          } else {
+            setColumns(columnPosition.columns);
+          }
+        }}
       />
     </Container>
   );

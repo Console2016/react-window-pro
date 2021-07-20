@@ -8,7 +8,9 @@ import { VariableSizeGrid, GridOnScrollProps } from "react-window";
 import { ReactNode, Ref } from "react";
 import { CSSProperties } from "styled-components";
 
-export type TTitle = ReactNode | (({ dataIndex, column }: { dataIndex: string; column: IVariableColumn }) => ReactNode);
+export type TTitle =
+  | ReactNode
+  | (({ dataIndex, column, isDraging }: { dataIndex: string; column: IVariableColumn; isDraging: boolean }) => ReactNode);
 
 export interface IVariableColumn<RecordType = any> {
   width: string | number;
@@ -50,14 +52,14 @@ export type TPlaceholder<RecordType = any> =
       dataIndex,
       record,
       column,
-      value
+      value,
     }: {
       columnIndex: number;
       rowIndex: number;
       record: RecordType;
       column: IVariableColumn;
       dataIndex: string;
-      value:any
+      value: any;
     }) => ReactNode);
 
 type TRowRender = ({ columnIndex, data }: { columnIndex: number; data: TObject; width: number }) => ReactNode;
@@ -178,6 +180,7 @@ export interface IStickyHeaderProps {
   tableHeight: number;
   stickyHeight: number;
   stickyWidth: number;
+  nonStrickyWidth: number;
   headerColumns: IHeadersStyle[];
   columns: IVariableColumn[];
   stickyHeaderColumns: IHeadersStyle[];

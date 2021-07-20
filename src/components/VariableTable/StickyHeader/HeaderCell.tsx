@@ -41,7 +41,7 @@ const Component = memo(
   ({ tableHeight, style, column, dataIndex, isDraging, onSort, onResize, onReposition, toggleDragState }: IMemoCellProp) => {
     const { title, sorter, sortOrder, resizer, reposition } = column;
 
-    const child = typeof title === "function" ? title({ dataIndex, column }) : title || "";
+    const child = typeof title === "function" ? title({ dataIndex, column, isDraging }) : title || "";
 
     const _style: CSSProperties = {
       position: "absolute",

@@ -1,6 +1,6 @@
 {
   "name": "react-window-pro",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "main": "lib/index.js",
   "author": "sun.t",
   "module": "es/index.js",

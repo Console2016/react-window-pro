@@ -286,6 +286,8 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
     [columns, _columnWidth, _rowHegiht, rawData]
   );
 
+  const _style = useMemo(() => ({ overflow: "overlay", ...(style || {}) }), [style]);
+
   return (
     <StickyGridContext.Provider
       value={{
@@ -318,7 +320,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
         outerRef={outerRef}
         innerRef={innerRef}
         direction={direction}
-        style={style}
+        style={_style}
         className={className}
         height={height}
         width={width}

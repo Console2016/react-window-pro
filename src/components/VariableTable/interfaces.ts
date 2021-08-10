@@ -64,6 +64,8 @@ export type TPlaceholder<RecordType = any> =
 
 type TRowRender = ({ columnIndex, data }: { columnIndex: number; data: TObject; width: number }) => ReactNode;
 
+type TEmptyRender = (css: CSSProperties) => ReactNode;
+
 export type TObject = {
   [key: string]: any;
   children?: TObject[];
@@ -130,6 +132,7 @@ export interface IProps<RecordType> {
   overscanRowCount?: number;
   childrenRawName?: string;
   groupRowRender?: TRowRender;
+  emptyRender?: TEmptyRender;
 }
 
 export interface IStickyContext {
@@ -156,6 +159,7 @@ export interface IStickyContext {
   // rowHeight?: (index: number) => number;
   placeholder?: TPlaceholder;
   groupRowRender?: TRowRender;
+  emptyRender?: TEmptyRender;
   onChange?: TOnChange;
 }
 

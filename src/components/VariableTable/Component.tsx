@@ -2,7 +2,7 @@
  * @Author: sun.t
  * @Date: 2020-09-14 15:50:04
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-04-20 14:54:08
+ * @Last Modified time: 2021-08-10 17:22:14
  * @remark: 1. rawData发生变化会导致所有高度缓存刷新
  */
 import React, { useCallback, forwardRef, createContext, ReactElement, useMemo, ForwardedRef, useImperativeHandle } from "react";
@@ -13,6 +13,8 @@ import { usePreprocess, useRespond, useInitialScroll } from "./hooks";
 import ScrollCell from "./ScrollCell";
 import StickyHeader from "./StickyHeader";
 import StickyColumns from "./StickyColumns";
+import Empty from "./image/empty.svg";
+import { CSSProperties } from "styled-components";
 
 const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...rest }, ref) => (
   <StickyGridContext.Consumer>
@@ -37,6 +39,7 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
       placeholder,
       childrenRawName,
       groupRowRender,
+      emptyRender,
       onChange,
     }) => {
       // If useIsScrolling is enabled for this grid, children's props receives an additional isScrolling boolean prop
@@ -88,8 +91,22 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
         height: `${parseFloat(rest.style.height) + stickyHeight}px`,
       };
 
+      const emptyStyle: CSSProperties = {
+        display: "flex",
+        height: "100%",
+        paddingTop: 50,
+        flexDirection: "column",
+        alignItems: "center",
+        width: containerStyle.width,
+        top: stickyHeight,
+        left: stickyWidth,
+        position: "absolute",
+        color: "rgba(0, 0, 0, 0.25)",
+      };
+
       return (
         <div className={innerClassName} ref={ref} {...{ ...rest, style: containerStyle }}>
+          {/* 列头 */}
           {isHeader ? (
             <StickyHeader
               tableHeight={height}
@@ -104,33 +121,47 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
               onChange={onChange}
             />
           ) : null}
-          {/* 固定列 */}
-          {stickyColumnsCount ? (
-            <StickyColumns
-              columns={columns}
-              rawData={rawData}
-              rows={rowsOfStickyColumns}
-              stickyHeight={stickyHeight}
-              stickyWidth={stickyWidth}
-              stickyColumnsCount={stickyColumnsCount}
-              columnWidthCache={columnWidthCache}
-              className={stickyBodyClassName}
-              isScrolling={isScrolling}
-              placeholder={placeholder}
-              groupRowRender={groupRowRender}
-              childrenRawName={childrenRawName}
-            />
-          ) : null}
-          <div className={bodyClassName} style={{ top: stickyHeight, left: stickyWidth, position: "absolute" }}>
-            {children}
 
-            {/* 分组行 */}
-            {Object.values(GroupRows).map(({ style, columnIndex, data, key }) => (
-              <div style={style} key={key}>
-                {groupRowRender ? groupRowRender({ columnIndex: columnIndex + stickyColumnsCount, data, width: nonStrickyWidth }) : null}
+          {rawData.length > 0 ? (
+            <>
+              {/* 固定列 */}
+              {stickyColumnsCount ? (
+                <StickyColumns
+                  columns={columns}
+                  rawData={rawData}
+                  rows={rowsOfStickyColumns}
+                  stickyHeight={stickyHeight}
+                  stickyWidth={stickyWidth}
+                  stickyColumnsCount={stickyColumnsCount}
+                  columnWidthCache={columnWidthCache}
+                  className={stickyBodyClassName}
+                  isScrolling={isScrolling}
+                  placeholder={placeholder}
+                  groupRowRender={groupRowRender}
+                  childrenRawName={childrenRawName}
+                />
+              ) : null}
+              <div className={bodyClassName} style={{ top: stickyHeight, left: stickyWidth, position: "absolute" }}>
+                {children}
+
+                {/* 分组行 */}
+                {Object.values(GroupRows).map(({ style, columnIndex, data, key }) => (
+                  <div style={style} key={key}>
+                    {groupRowRender
+                      ? groupRowRender({ columnIndex: columnIndex + stickyColumnsCount, data, width: nonStrickyWidth })
+                      : null}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          ) : emptyRender ? (
+            emptyRender(emptyStyle)
+          ) : (
+            <div className={bodyClassName} style={emptyStyle}>
+              <img src={Empty} style={{ height: "50px", paddingBottom: "10px" }} />
+              暂无数据
+            </div>
+          )}
         </div>
       );
     }}
@@ -190,6 +221,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
     onChange,
     itemKey,
     groupRowRender,
+    emptyRender,
     initialScrollRowIndex,
     initialScrollColumnIndex,
 
@@ -312,6 +344,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
         // func
         placeholder,
         groupRowRender,
+        emptyRender,
         onChange,
       }}
     >

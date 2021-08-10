@@ -388,6 +388,22 @@ RepositionColumnExample.args = {
 };
 RepositionColumnExample.storyName = "位置调整";
 
+// 13. 数据为空
+export const EmptyExample = Template.bind({});
+EmptyExample.args = {
+  header: true,
+  width: 800,
+  height: 400,
+  columns: columnsList.map((key) => ({
+    title: renderHeaderCell,
+    dataIndex: key,
+    width: 60,
+    reposition: ["a", "b", "c", "d", "e"].includes(key),
+  })),
+  rawData: []
+};
+EmptyExample.storyName = "空数据";
+
 // 13. bug test
 export const BugTest = () => {
   const [columns, setColumns] = useState(

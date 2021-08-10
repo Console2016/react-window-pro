@@ -59,7 +59,10 @@ const StickyHeader = ({
       const newColumns = [...columns],
         foundColumnIndex = newColumns.findIndex((col) => col.dataIndex === dataIndex),
         width = column.width + x;
-
+      if (width <= 0) {
+        console.warn("error width");
+        return;
+      }
       newColumns[foundColumnIndex] = { ...column, width };
       onChange && onChange({ columnSize: { dataIndex, width, column, columns: newColumns }, action: "resizeColumn" });
     },

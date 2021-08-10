@@ -391,7 +391,7 @@ RepositionColumnExample.storyName = "位置调整";
 // 13. bug test
 export const BugTest = () => {
   const [columns, setColumns] = useState(
-    columnsList.map((key) => ({ title: renderHeaderCell, dataIndex: key, width: 140, resizer: ["a", "b"].includes(key), sorter:true, reposition:true }))
+    columnsList.map((key) => ({ title: renderHeaderCell, dataIndex: key, width: 140, resizer: true, sorter:true, reposition:true }))
   );
 
   // useEffect(() => {

@@ -2,9 +2,9 @@
  * @Author: sun.t
  * @Date: 2021-03-27 17:37:50
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-03-31 17:56:02
+ * @Last Modified time: 2021-07-28 14:31:34
  */
-import React, { CSSProperties, memo } from "react";
+import React, { CSSProperties, memo, useCallback, useMemo } from "react";
 import { areEqual } from "react-window";
 import Sort from "./Sort";
 import Resizer from "./Resizer";
@@ -65,6 +65,15 @@ const Component = memo(
           return <div style={{ ...style, ...dragingStyle }}>{children}</div>;
         };
 
+    const onDragEnd = useCallback(
+      ({ translation: { x } }) => {
+        onResize(dataIndex, x, column);
+      },
+      [onResize]
+    );
+
+    const resizerStyle = useMemo(() => ({ height: tableHeight }), [tableHeight]);
+
     return (
       <Wrapper style={_style} column={column} onReposition={onReposition} toggleDragState={toggleDragState} isDraging={isDraging}>
         {child}
@@ -76,14 +85,7 @@ const Component = memo(
           />
         ) : null}
 
-        {resizer ? (
-          <Resizer
-            style={{
-              height: tableHeight,
-            }}
-            onDragEnd={({ translation: { x } }) => onResize(dataIndex, x, column)}
-          />
-        ) : null}
+        {resizer ? <Resizer style={resizerStyle} onDragEnd={onDragEnd} /> : null}
       </Wrapper>
     );
   },

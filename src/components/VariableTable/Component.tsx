@@ -2,7 +2,7 @@
  * @Author: sun.t
  * @Date: 2020-09-14 15:50:04
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-08-10 17:22:14
+ * @Last Modified time: 2021-08-17 17:28:50
  * @remark: 1. rawData发生变化会导致所有高度缓存刷新
  */
 import React, { useCallback, forwardRef, createContext, ReactElement, useMemo, ForwardedRef, useImperativeHandle } from "react";
@@ -20,6 +20,7 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
   <StickyGridContext.Consumer>
     {({
       height,
+      width,
       innerClassName,
       bodyClassName,
       stickyBodyClassName,
@@ -84,10 +85,13 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
         rowTopCache,
       });
 
+
+      const containerWidth = parseFloat(rest.style.width) + stickyWidth;
+
       // body样式
       const containerStyle = {
         ...rest.style,
-        width: `${parseFloat(rest.style.width) + stickyWidth}px`,
+        width: `${containerWidth}px`,
         height: `${parseFloat(rest.style.height) + stickyHeight}px`,
       };
 
@@ -97,7 +101,7 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
         paddingTop: 50,
         flexDirection: "column",
         alignItems: "center",
-        width: containerStyle.width,
+        width: Math.max(containerWidth, width),
         top: stickyHeight,
         left: stickyWidth,
         position: "absolute",
@@ -170,6 +174,7 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
 
 const StickyGridContext = createContext<IStickyContext>({
   height: 0,
+  width: 0,
   stickyHeight: 0,
   stickyWidth: 0,
   nonStrickyWidth: 0,
@@ -324,6 +329,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
     <StickyGridContext.Provider
       value={{
         height,
+        width,
         stickyHeight,
         stickyWidth,
         nonStrickyWidth,

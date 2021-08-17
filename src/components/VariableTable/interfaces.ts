@@ -137,6 +137,7 @@ export interface IProps<RecordType> {
 
 export interface IStickyContext {
   height: number;
+  width: number;
   stickyHeight: number; // 冻结行总高度
   stickyWidth: number; // 冻结列总宽度
   nonStrickyWidth: number; // 非冻结列总宽度

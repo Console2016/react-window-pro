@@ -389,25 +389,34 @@ RepositionColumnExample.args = {
 RepositionColumnExample.storyName = "位置调整";
 
 // 13. 数据为空
-export const EmptyExample = Template.bind({});
-EmptyExample.args = {
-  header: true,
-  width: 800,
-  height: 400,
-  columns: columnsList.map((key) => ({
-    title: renderHeaderCell,
-    dataIndex: key,
-    width: 60,
-    reposition: ["a", "b", "c", "d", "e"].includes(key),
-  })),
-  rawData: []
+export const EmptyExample = () => {
+  const [columns, setColumns] = useState([]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setColumns(
+        columnsList.map((key) => ({
+          title: renderHeaderCell,
+          dataIndex: key,
+          width: 60,
+          reposition: ["a", "b", "c", "d", "e"].includes(key),
+        }))
+      );
+    }, 5000);
+  }, []);
+
+  return (
+    <Container>
+      <VariableTable header={true} width={800} height={400} columns={columns} rawData={[]} />
+    </Container>
+  );
 };
 EmptyExample.storyName = "空数据";
 
 // 13. bug test
 export const BugTest = () => {
   const [columns, setColumns] = useState(
-    columnsList.map((key) => ({ title: renderHeaderCell, dataIndex: key, width: 140, resizer: true, sorter:true, reposition:true }))
+    columnsList.map((key) => ({ title: renderHeaderCell, dataIndex: key, width: 140, resizer: true, sorter: true, reposition: true }))
   );
 
   // useEffect(() => {

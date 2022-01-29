@@ -63,13 +63,14 @@ const useDragOffset = function ({ direction, style = EmptyStyle, onDrag, onDragE
 
   // drop
   const handleMouseUp = useCallback(() => {
-    onDragEnd && onDragEnd({ translation: translationRef.current });
-    // console.log("up");
+    
     setState((state) => ({
       ...state,
       translation: { x: 0, y: 0 },
       isDragging: false,
     }));
+
+    onDragEnd && onDragEnd({ translation: translationRef.current });
   }, [onDragEnd]);
 
   // add|remove event

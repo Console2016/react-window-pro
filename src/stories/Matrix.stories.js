@@ -4,6 +4,7 @@ import VariableMatrix from "../components/VariableMatrix";
 import styled from "styled-components";
 import randomColor from "./common/randomColor";
 import mock_2 from "./mock/2.json";
+import mock_4 from "./mock/4.json";
 // import { MatrixData1 } from "./dummyData";
 
 const Component = {
@@ -138,22 +139,23 @@ CustomGroupRowClassExample.args = {
   height: 400,
   cellHeight: 80,
   cellWidth: 200,
-  rawData: new Array(3).fill(null).map((groupValue, groupIndex) => {
-    const group = { id: groupIndex, children: [] };
+  rawData: mock_4,
+  // rawData: new Array(3).fill(null).map((groupValue, groupIndex) => {
+  //   const group = { id: groupIndex, children: [] };
 
-    group.children = new Array(5).fill(null).map((cgroupValue, cgroupIndex) => {
-      const cgroup = { id: `${groupIndex}-${cgroupIndex}`, children: [] };
+  //   group.children = new Array(5).fill(null).map((cgroupValue, cgroupIndex) => {
+  //     const cgroup = { id: `${groupIndex}-${cgroupIndex}`, children: [] };
 
-      cgroup.children = new Array(100).fill(null).map((value, index) => {
-        const cell = { id: `${groupIndex}-${cgroupIndex}-${index}` };
-        return cell;
-      });
+  //     cgroup.children = new Array(100).fill(null).map((value, index) => {
+  //       const cell = { id: `${groupIndex}-${cgroupIndex}-${index}` };
+  //       return cell;
+  //     });
 
-      return cgroup;
-    });
+  //     return cgroup;
+  //   });
 
-    return group;
-  }),
+  //   return group;
+  // }),
   groupRender: ({ style }) => {
     return (
       <div style={{ ...style, backgroundColor: randomColor() }}>

@@ -252,26 +252,42 @@ export const ScrollExample = () => (
 ScrollExample.storyName = "滚动到指定位置";
 
 // 9 排序
-export const SortExample = Template.bind({});
-SortExample.args = {
-  header: true,
-  width: 800,
-  height: 400,
-  columns: columnsList.map((key) => ({
-    title: renderHeaderCell,
-    dataIndex: key,
-    width: 140,
-    sorter: !["a", "b"].includes(key),
-    sortOrder: key === "c" ? "descend" : undefined,
-  })),
-  rawData: new Array(50).fill(null).map((v, index) => {
-    let row = { id: `${index}` };
+// export const SortExample = Template.bind({});
+export const SortExample = () => {
+  const [columns, setColumns] = useState(
+    columnsList.map((key) => ({
+      title: renderHeaderCell,
+      dataIndex: key,
+      width: 140,
+      sorter: !["a", "b"].includes(key),
+      sortOrder: key === "c" ? "descend" : undefined,
+    }))
+  );
 
-    columnsList.forEach((key) => (row[key] = `${index}_${key}`));
+  const [rawData, setRawData] = useState(
+    new Array(50).fill(null).map((v, index) => {
+      let row = { id: `${index}` };
 
-    return row;
-  }),
-  onChange: action("sort change"),
+      columnsList.forEach((key) => (row[key] = `${index}_${key}`));
+
+      return row;
+    })
+  );
+
+  return (
+    <VariableTable
+      header
+      width={800}
+      height={400}
+      columns={columns}
+      rawData={rawData}
+      onChange={({ sorter }) => {
+        const { columns } = sorter;
+
+        setColumns(columns);
+      }}
+    />
+  );
 };
 SortExample.storyName = "排序";
 

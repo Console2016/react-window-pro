@@ -8,4 +8,5 @@ export interface ICellProps {
   onReposition: (from: string, to: string, position: "front" | "back") => void;
   toggleDragState: (isDraging: boolean) => void;
   isDraging: boolean;
+  onClick:() => void
 }

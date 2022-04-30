@@ -85,7 +85,6 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
         rowTopCache,
       });
 
-
       const containerWidth = parseFloat(rest.style.width) + stickyWidth;
 
       // body样式
@@ -105,7 +104,8 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
         top: stickyHeight,
         left: stickyWidth,
         position: "absolute",
-        color: "rgba(0, 0, 0, 0.25)",
+        opacity: 0.5,
+        // color: "rgba(0, 0, 0, 0.25)",
       };
 
       return (
@@ -248,10 +248,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
     columnLeftCache,
     columnWidthCache,
     avergeColumnWidth,
-  } = useMemo(
-    () => usePreprocess<RecordType>({ header, columns, columnWidth }),
-    [header, columns, columnWidth]
-  );
+  } = useMemo(() => usePreprocess<RecordType>({ header, columns, columnWidth }), [header, columns, columnWidth]);
 
   // 这里关于行位置&行高的缓存考虑
   // 1. 如果放到这里统一计算, 那只要rawData不变其实就只用计算一次,提高空间成本来降低时间成本
@@ -266,7 +263,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
 
   // 单元格渲染
   const GridCell = useCallback(
-    ({ columnIndex, rowIndex, style, data, isScrolling }) => {
+    ({ columnIndex, rowIndex, style, data, isScrolling }: any) => {
       const row = data[rowIndex];
 
       // 判断是否分组行
@@ -290,8 +287,8 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
   );
 
   // 手动将columns划分开,这里需要加上偏移量
-  const _columnWidth = useCallback((index) => columnWidthCache[index + stickyColumnsCount], [columnWidthCache, stickyColumnsCount]),
-    _rowHegiht = useCallback((index) => rowHeightCache[index], [rowHeightCache]);
+  const _columnWidth = useCallback((index: number) => columnWidthCache[index + stickyColumnsCount], [columnWidthCache, stickyColumnsCount]),
+    _rowHegiht = useCallback((index: number) => rowHeightCache[index], [rowHeightCache]);
 
   // 初始化偏移
   const { _initialScrollLeft, _initialScrollTop } = useInitialScroll({

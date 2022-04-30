@@ -1,6 +1,6 @@
 {
   "name": "react-window-pro",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "main": "lib/index.js",
   "author": "sun.t",
   "module": "es/index.js",
@@ -39,6 +39,7 @@
     "@types/styled-components": "^5.1.7",
     "antd": "^4.11.2",
     "babel-loader": "^8.2.2",
+    "cross-env": "^7.0.3",
     "react-window": "^1.8.6",
     "rimraf": "^3.0.2",
     "rollup": "^2.38.1",

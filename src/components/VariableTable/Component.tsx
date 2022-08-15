@@ -16,6 +16,7 @@ import StickyHeader from "./StickyHeader";
 import StickyColumns from "./StickyColumns";
 import Empty from "./image/empty.svg";
 import { CSSProperties } from "styled-components";
+import { EMPTY_MAP } from "./constant";
 
 const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...rest }, ref) => (
   <StickyGridContext.Consumer>
@@ -238,7 +239,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
     headerClassName = "",
     stickyHeaderClassName = "",
 
-    styleSheetManagerProps
+    styleSheetManagerProps = EMPTY_MAP,
   } = props;
 
   // 预计算
@@ -326,7 +327,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
   const _style = useMemo(() => ({ overflow: "overlay", ...(style || {}) }), [style]);
 
   return (
-    <StyleSheetManager>
+    <StyleSheetManager {...styleSheetManagerProps}>
       <StickyGridContext.Provider
         value={{
           height,

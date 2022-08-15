@@ -5,3 +5,5 @@ export const DEFAULT_ROW_HEIGHT = 30;
 // 默认值宽度
 export const defaultColumnWidth = () => DEFAULT_COLUMN_WIDTH;
 export const defaultRowHeight = () => DEFAULT_ROW_HEIGHT;
+
+export const EMPTY_MAP ={};

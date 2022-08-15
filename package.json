@@ -1,6 +1,6 @@
 {
   "name": "react-window-pro",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "main": "lib/index.js",
   "author": "sun.t",
   "module": "es/index.js",
@@ -53,5 +53,8 @@
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+  }
 }

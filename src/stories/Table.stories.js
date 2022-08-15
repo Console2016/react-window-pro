@@ -480,3 +480,92 @@ export const BugTest = () => {
   );
 };
 BugTest.storyName = "Bug测试";
+
+// 13. bug test
+export const BugTest2 = () => {
+  const [columns, setColumns] = useState(
+    [
+      {
+          "title": "电场名称",
+          "dataIndex": "farmName",
+          "key": "farmName",
+          "width": 100
+      },
+      {
+          "title": "设备ID",
+          "dataIndex": "deviceId",
+          "key": "deviceId",
+          "width": 100
+      },
+      {
+          "title": "设备名称",
+          "dataIndex": "deviceName",
+          "key": "deviceName",
+          "width": 100
+      },
+      {
+          "title": "设备类型",
+          "dataIndex": "deviceType",
+          "key": "deviceType",
+          "width": 100
+      },
+      {
+          "title": "型号",
+          "dataIndex": "deviceModel",
+          "key": "deviceModel",
+          "width": 100
+      },
+      {
+          "title": "操作",
+          "dataIndex": "operations",
+          "key": "operations",
+          "width": 100
+      }
+  ]
+  );
+
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     Modal.info({
+  //       title: "This is a notification message",
+  //       content: (
+  //         <div>
+  //           <p>some messages...some messages...</p>
+  //           <p>some messages...some messages...</p>
+  //         </div>
+  //       ),
+  //       onOk() {},
+  //       keyboard: true,
+  //     });
+  //   }, 10000),
+  //     [];
+  // });
+
+  return (
+    <Container>
+      <VariableTable
+        header={true}
+        width={800}
+        height={400}
+        columns={columns}
+        rawData={new Array(50).fill(null).map((v, index) => {
+          let row = { id: `${index}` };
+
+          columnsList.forEach((key) => (row[key] = `${index}_${key}`));
+
+          return row;
+        })}
+        onChange={({ sorter, columnSize, columnPosition, action }) => {
+          if (action === "sort") {
+            setColumns(sorter.columns);
+          } else if (action === "resizeColumn") {
+            setColumns(columnSize.columns);
+          } else {
+            setColumns(columnPosition.columns);
+          }
+        }}
+      />
+    </Container>
+  );
+};
+BugTest2.storyName = "Bug测试2";

@@ -2,11 +2,12 @@
  * @Author: sun.t
  * @Date: 2020-09-14 15:50:04
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-08-17 17:28:50
+ * @Last Modified time: 2022-08-15 11:09:43
  * @remark: 1. rawData发生变化会导致所有高度缓存刷新
  */
 import React, { useCallback, forwardRef, createContext, ReactElement, useMemo, ForwardedRef, useImperativeHandle } from "react";
 import { VariableSizeGrid } from "react-window";
+import { StyleSheetManager } from "styled-components";
 import { IProps, IHeadersStyle, IStickyContext, VariableTable } from "./interfaces";
 import { getRenderedCursor, headerBuilder, columnsBuilder, preprocessRawData } from "./helper";
 import { usePreprocess, useRespond, useInitialScroll } from "./hooks";
@@ -236,6 +237,8 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
     stickyBodyClassName = "",
     headerClassName = "",
     stickyHeaderClassName = "",
+
+    styleSheetManagerProps
   } = props;
 
   // 预计算
@@ -288,7 +291,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
 
   // 手动将columns划分开,这里需要加上偏移量
   const _columnWidth = useCallback((index: number) => columnWidthCache[index + stickyColumnsCount], [columnWidthCache, stickyColumnsCount]),
-    _rowHegiht = useCallback((index: number) => rowHeightCache[index], [rowHeightCache]);
+    _rowHeight = useCallback((index: number) => rowHeightCache[index], [rowHeightCache]);
 
   // 初始化偏移
   const { _initialScrollLeft, _initialScrollTop } = useInitialScroll({
@@ -313,86 +316,88 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
         columns,
         rawData,
         columnWidth: _columnWidth,
-        rowHeight: _rowHegiht,
+        rowHeight: _rowHeight,
         grid: refCache.current,
       };
     },
-    [columns, _columnWidth, _rowHegiht, rawData]
+    [columns, _columnWidth, _rowHeight, rawData]
   );
 
   const _style = useMemo(() => ({ overflow: "overlay", ...(style || {}) }), [style]);
 
   return (
-    <StickyGridContext.Provider
-      value={{
-        height,
-        width,
-        stickyHeight,
-        stickyWidth,
-        nonStrickyWidth,
-        columns,
-        stickyColumnsCount,
-        nonStrickyColumnsCount,
-        columnLeftCache,
-        columnWidthCache,
-        rowHeightCache,
-        rowTopCache,
-        innerClassName,
-        bodyClassName,
-        stickyBodyClassName,
-        headerClassName,
-        stickyHeaderClassName,
-        rawData: flatRawData,
-        childrenRawName,
-        // func
-        placeholder,
-        groupRowRender,
-        emptyRender,
-        onChange,
-      }}
-    >
-      <VariableSizeGrid
-        ref={refCache}
-        outerRef={outerRef}
-        innerRef={innerRef}
-        direction={direction}
-        style={_style}
-        className={className}
-        height={height}
-        width={width}
-        itemData={flatRawData}
-        columnCount={nonStrickyColumnsCount}
-        rowCount={flatRawData.length}
-        columnWidth={_columnWidth}
-        rowHeight={_rowHegiht}
-        useIsScrolling={useIsScrolling}
-        initialScrollLeft={_initialScrollLeft}
-        initialScrollTop={_initialScrollTop}
-        overscanColumnCount={overscanColumnCount}
-        overscanRowCount={overscanRowCount}
-        innerElementType={innerGridElementType}
-        estimatedColumnWidth={avergeColumnWidth} // 冻结列横向滚动条当数据为空时异常,整体宽度计算错误; 数据回空时会使用该值估算宽度,默认为50
-        // outerElementType
-        itemKey={itemKey}
-        onScroll={(props) => {
-          onScroll && onScroll(props);
-        }}
-        onItemsRendered={({
-          overscanColumnStartIndex,
-          overscanColumnStopIndex,
-          overscanRowStartIndex,
-          overscanRowStopIndex,
-          visibleColumnStartIndex,
-          visibleColumnStopIndex,
-          visibleRowStartIndex,
-          visibleRowStopIndex,
-        }) => {
-          // console.log("item render");
+    <StyleSheetManager>
+      <StickyGridContext.Provider
+        value={{
+          height,
+          width,
+          stickyHeight,
+          stickyWidth,
+          nonStrickyWidth,
+          columns,
+          stickyColumnsCount,
+          nonStrickyColumnsCount,
+          columnLeftCache,
+          columnWidthCache,
+          rowHeightCache,
+          rowTopCache,
+          innerClassName,
+          bodyClassName,
+          stickyBodyClassName,
+          headerClassName,
+          stickyHeaderClassName,
+          rawData: flatRawData,
+          childrenRawName,
+          // func
+          placeholder,
+          groupRowRender,
+          emptyRender,
+          onChange,
         }}
       >
-        {GridCell}
-      </VariableSizeGrid>
-    </StickyGridContext.Provider>
+        <VariableSizeGrid
+          ref={refCache}
+          outerRef={outerRef}
+          innerRef={innerRef}
+          direction={direction}
+          style={_style}
+          className={className}
+          height={height}
+          width={width}
+          itemData={flatRawData}
+          columnCount={nonStrickyColumnsCount}
+          rowCount={flatRawData.length}
+          columnWidth={_columnWidth}
+          rowHeight={_rowHeight}
+          useIsScrolling={useIsScrolling}
+          initialScrollLeft={_initialScrollLeft}
+          initialScrollTop={_initialScrollTop}
+          overscanColumnCount={overscanColumnCount}
+          overscanRowCount={overscanRowCount}
+          innerElementType={innerGridElementType}
+          estimatedColumnWidth={avergeColumnWidth} // 冻结列横向滚动条当数据为空时异常,整体宽度计算错误; 数据回空时会使用该值估算宽度,默认为50
+          // outerElementType
+          itemKey={itemKey}
+          onScroll={(props) => {
+            onScroll && onScroll(props);
+          }}
+          onItemsRendered={({
+            overscanColumnStartIndex,
+            overscanColumnStopIndex,
+            overscanRowStartIndex,
+            overscanRowStopIndex,
+            visibleColumnStartIndex,
+            visibleColumnStopIndex,
+            visibleRowStartIndex,
+            visibleRowStopIndex,
+          }) => {
+            // console.log("item render");
+          }}
+        >
+          {GridCell}
+        </VariableSizeGrid>
+      </StickyGridContext.Provider>
+    </StyleSheetManager>
   );
 }
 

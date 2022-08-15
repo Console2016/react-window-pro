@@ -2,11 +2,11 @@
  * @Author: sun.t
  * @Date: 2020-09-16 09:35:50
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-04-20 10:38:56
+ * @Last Modified time: 2022-08-15 11:41:48
  */
 import { VariableSizeGrid, GridOnScrollProps } from "react-window";
 import { ReactNode, Ref } from "react";
-import { CSSProperties } from "styled-components";
+import { CSSProperties, StyleSheetManagerProps } from "styled-components";
 
 export type TTitle =
   | ReactNode
@@ -133,6 +133,8 @@ export interface IProps<RecordType> {
   childrenRawName?: string;
   groupRowRender?: TRowRender;
   emptyRender?: TEmptyRender;
+
+  styleSheetManagerProps?: StyleSheetManagerProps;
 }
 
 export interface IStickyContext {

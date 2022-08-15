@@ -2,13 +2,15 @@
  * @Author: sun.t
  * @Date: 2020-09-16 09:35:50
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-04-20 10:38:56
+ * @Last Modified time: 2022-08-15 11:41:48
  */
 import { VariableSizeGrid, GridOnScrollProps } from "react-window";
 import { ReactNode, Ref } from "react";
-import { CSSProperties } from "styled-components";
+import { CSSProperties, StyleSheetManagerProps } from "styled-components";
 
-export type TTitle = ReactNode | (({ dataIndex, column }: { dataIndex: string; column: IVariableColumn }) => ReactNode);
+export type TTitle =
+  | ReactNode
+  | (({ dataIndex, column, isDraging }: { dataIndex: string; column: IVariableColumn; isDraging: boolean }) => ReactNode);
 
 export interface IVariableColumn<RecordType = any> {
   width: string | number;
@@ -50,17 +52,19 @@ export type TPlaceholder<RecordType = any> =
       dataIndex,
       record,
       column,
-      value
+      value,
     }: {
       columnIndex: number;
       rowIndex: number;
       record: RecordType;
       column: IVariableColumn;
       dataIndex: string;
-      value:any
+      value: any;
     }) => ReactNode);
 
 type TRowRender = ({ columnIndex, data }: { columnIndex: number; data: TObject; width: number }) => ReactNode;
+
+type TEmptyRender = (css: CSSProperties) => ReactNode;
 
 export type TObject = {
   [key: string]: any;
@@ -128,10 +132,14 @@ export interface IProps<RecordType> {
   overscanRowCount?: number;
   childrenRawName?: string;
   groupRowRender?: TRowRender;
+  emptyRender?: TEmptyRender;
+
+  styleSheetManagerProps?: StyleSheetManagerProps;
 }
 
 export interface IStickyContext {
   height: number;
+  width: number;
   stickyHeight: number; // 冻结行总高度
   stickyWidth: number; // 冻结列总宽度
   nonStrickyWidth: number; // 非冻结列总宽度
@@ -154,6 +162,7 @@ export interface IStickyContext {
   // rowHeight?: (index: number) => number;
   placeholder?: TPlaceholder;
   groupRowRender?: TRowRender;
+  emptyRender?: TEmptyRender;
   onChange?: TOnChange;
 }
 
@@ -178,6 +187,7 @@ export interface IStickyHeaderProps {
   tableHeight: number;
   stickyHeight: number;
   stickyWidth: number;
+  nonStrickyWidth: number;
   headerColumns: IHeadersStyle[];
   columns: IVariableColumn[];
   stickyHeaderColumns: IHeadersStyle[];

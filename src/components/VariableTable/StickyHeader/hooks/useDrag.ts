@@ -1,8 +1,8 @@
 import { useCallback } from "react";
-import { IVariableColumn } from "../../interfaces";
+// import { IVariableColumn } from "../../interfaces";
 
 interface IProps {
-  column: IVariableColumn;
+  // column: IVariableColumn;
   dataIndex: string;
   onReposition: (from: string, to: string, position: "front" | "back") => void;
   toggleDragState: (isDraging: boolean) => void;
@@ -34,7 +34,7 @@ function restore(e: any) {
   }
 }
 
-function useDrag({ column, dataIndex, onReposition, toggleDragState }: IProps) {
+function useDrag({ dataIndex, onReposition, toggleDragState }: IProps) {
   const onDragStart = useCallback(
     (e) => {
       e.dataTransfer.setData("Text", dataIndex);
@@ -114,7 +114,7 @@ function useDrag({ column, dataIndex, onReposition, toggleDragState }: IProps) {
 
       restore(e);
     },
-    [toggleDragState]
+    [toggleDragState, onReposition]
   );
 
   return {

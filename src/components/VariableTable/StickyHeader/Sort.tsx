@@ -23,10 +23,10 @@ const SortDESC = styled.div`
   width: 0px;
   height: 0px;
 
-  &:hover {
-    border-color: #1890ff transparent transparent transparent;
-    cursor: pointer;
-  }
+  // &:hover {
+  //   border-color: #1890ff transparent transparent transparent;
+  //   cursor: pointer;
+  // }
 
   ${(props: { active: boolean; type: "ascend" | "descend" }) =>
     props.active
@@ -41,10 +41,10 @@ const SortASC = styled.div`
   width: 0px;
   height: 0px;
 
-  &:hover {
-    border-color: transparent transparent #1890ff transparent;
-    cursor: pointer;
-  }
+  // &:hover {
+  //   border-color: transparent transparent #1890ff transparent;
+  //   cursor: pointer;
+  // }
 
   ${(props: { active: boolean; type: "ascend" | "descend" }) =>
     props.active
@@ -54,14 +54,14 @@ const SortASC = styled.div`
 
 interface IProps {
   sortOrder?: "ascend" | "descend" | false;
-  onSort: (sort: "ascend" | "descend") => void;
+  // onSort: (sort: "ascend" | "descend") => void;
 }
 
-const Component = function ({ sortOrder, onSort }: IProps) {
+const Component = function ({ sortOrder }: IProps) {
   return (
     <Sort>
-      <SortASC active={sortOrder === "ascend"} type="ascend" onClick={() => onSort("ascend")} />
-      <SortDESC active={sortOrder === "descend"} type="descend" onClick={() => onSort("descend")} />
+      <SortASC active={sortOrder === "ascend"} type="ascend" />
+      <SortDESC active={sortOrder === "descend"} type="descend" />
     </Sort>
   );
 };

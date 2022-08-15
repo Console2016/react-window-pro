@@ -2,11 +2,11 @@ import React from "react";
 import useDrag from "./hooks/useDrag";
 import { ICellProps } from "./interfaces";
 
-const Component = ({ style, children, column, onReposition, toggleDragState }: ICellProps) => {
+const Component = ({ style, children, column, onReposition, toggleDragState, onClick }: ICellProps) => {
   const { dataIndex } = column;
 
   const { onDragStart, onDragEnd, onDragEnter, onDragLeave, onDragOver, onDrop } = useDrag({
-    column,
+    // column,
     dataIndex,
     onReposition,
     toggleDragState,
@@ -25,6 +25,7 @@ const Component = ({ style, children, column, onReposition, toggleDragState }: I
       onDragLeave={onDragLeave}
       onDragOver={onDragOver}
       onDrop={onDrop}
+      onClick={onClick}
     >
       <div style={{ height: "100%", width: "100%", display: "flex", flexDirection: "row", transition: "transform 500ms" }}>{children}</div>
     </div>

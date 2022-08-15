@@ -2,22 +2,26 @@
  * @Author: sun.t
  * @Date: 2020-09-14 15:50:04
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-04-20 14:54:08
+ * @Last Modified time: 2022-08-15 11:09:43
  * @remark: 1. rawData发生变化会导致所有高度缓存刷新
  */
 import React, { useCallback, forwardRef, createContext, ReactElement, useMemo, ForwardedRef, useImperativeHandle } from "react";
 import { VariableSizeGrid } from "react-window";
+import { StyleSheetManager } from "styled-components";
 import { IProps, IHeadersStyle, IStickyContext, VariableTable } from "./interfaces";
 import { getRenderedCursor, headerBuilder, columnsBuilder, preprocessRawData } from "./helper";
 import { usePreprocess, useRespond, useInitialScroll } from "./hooks";
 import ScrollCell from "./ScrollCell";
 import StickyHeader from "./StickyHeader";
 import StickyColumns from "./StickyColumns";
+import Empty from "./image/empty.svg";
+import { CSSProperties } from "styled-components";
 
 const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...rest }, ref) => (
   <StickyGridContext.Consumer>
     {({
       height,
+      width,
       innerClassName,
       bodyClassName,
       stickyBodyClassName,
@@ -37,6 +41,7 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
       placeholder,
       childrenRawName,
       groupRowRender,
+      emptyRender,
       onChange,
     }) => {
       // If useIsScrolling is enabled for this grid, children's props receives an additional isScrolling boolean prop
@@ -81,15 +86,32 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
         rowTopCache,
       });
 
+      const containerWidth = parseFloat(rest.style.width) + stickyWidth;
+
       // body样式
       const containerStyle = {
         ...rest.style,
-        width: `${parseFloat(rest.style.width) + stickyWidth}px`,
+        width: `${containerWidth}px`,
         height: `${parseFloat(rest.style.height) + stickyHeight}px`,
+      };
+
+      const emptyStyle: CSSProperties = {
+        display: "flex",
+        height: "100%",
+        paddingTop: 50,
+        flexDirection: "column",
+        alignItems: "center",
+        width: Math.max(containerWidth, width),
+        top: stickyHeight,
+        left: stickyWidth,
+        position: "absolute",
+        opacity: 0.5,
+        // color: "rgba(0, 0, 0, 0.25)",
       };
 
       return (
         <div className={innerClassName} ref={ref} {...{ ...rest, style: containerStyle }}>
+          {/* 列头 */}
           {isHeader ? (
             <StickyHeader
               tableHeight={height}
@@ -98,38 +120,53 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
               headerColumns={nonStickyHeaderColumns}
               stickyHeight={stickyHeight}
               stickyWidth={stickyWidth}
+              nonStrickyWidth={nonStrickyWidth}
               stickyClassName={stickyHeaderClassName}
               className={headerClassName}
               onChange={onChange}
             />
           ) : null}
-          {/* 固定列 */}
-          {stickyColumnsCount ? (
-            <StickyColumns
-              columns={columns}
-              rawData={rawData}
-              rows={rowsOfStickyColumns}
-              stickyHeight={stickyHeight}
-              stickyWidth={stickyWidth}
-              stickyColumnsCount={stickyColumnsCount}
-              columnWidthCache={columnWidthCache}
-              className={stickyBodyClassName}
-              isScrolling={isScrolling}
-              placeholder={placeholder}
-              groupRowRender={groupRowRender}
-              childrenRawName={childrenRawName}
-            />
-          ) : null}
-          <div className={bodyClassName} style={{ top: stickyHeight, left: stickyWidth, position: "absolute" }}>
-            {children}
 
-            {/* 分组行 */}
-            {Object.values(GroupRows).map(({ style, columnIndex, data, key }) => (
-              <div style={style} key={key}>
-                {groupRowRender ? groupRowRender({ columnIndex: columnIndex + stickyColumnsCount, data, width: nonStrickyWidth }) : null}
+          {rawData.length > 0 ? (
+            <>
+              {/* 固定列 */}
+              {stickyColumnsCount ? (
+                <StickyColumns
+                  columns={columns}
+                  rawData={rawData}
+                  rows={rowsOfStickyColumns}
+                  stickyHeight={stickyHeight}
+                  stickyWidth={stickyWidth}
+                  stickyColumnsCount={stickyColumnsCount}
+                  columnWidthCache={columnWidthCache}
+                  className={stickyBodyClassName}
+                  isScrolling={isScrolling}
+                  placeholder={placeholder}
+                  groupRowRender={groupRowRender}
+                  childrenRawName={childrenRawName}
+                />
+              ) : null}
+              <div className={bodyClassName} style={{ top: stickyHeight, left: stickyWidth, position: "absolute" }}>
+                {children}
+
+                {/* 分组行 */}
+                {Object.values(GroupRows).map(({ style, columnIndex, data, key }) => (
+                  <div style={style} key={key}>
+                    {groupRowRender
+                      ? groupRowRender({ columnIndex: columnIndex + stickyColumnsCount, data, width: nonStrickyWidth })
+                      : null}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          ) : emptyRender ? (
+            emptyRender(emptyStyle)
+          ) : (
+            <div className={bodyClassName} style={emptyStyle}>
+              <img src={Empty} style={{ height: "50px", paddingBottom: "10px" }} />
+              暂无数据
+            </div>
+          )}
         </div>
       );
     }}
@@ -138,6 +175,7 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
 
 const StickyGridContext = createContext<IStickyContext>({
   height: 0,
+  width: 0,
   stickyHeight: 0,
   stickyWidth: 0,
   nonStrickyWidth: 0,
@@ -189,6 +227,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
     onChange,
     itemKey,
     groupRowRender,
+    emptyRender,
     initialScrollRowIndex,
     initialScrollColumnIndex,
 
@@ -198,6 +237,8 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
     stickyBodyClassName = "",
     headerClassName = "",
     stickyHeaderClassName = "",
+
+    styleSheetManagerProps
   } = props;
 
   // 预计算
@@ -210,10 +251,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
     columnLeftCache,
     columnWidthCache,
     avergeColumnWidth,
-  } = useMemo(
-    () => usePreprocess<RecordType>({ header, columns, columnWidth }),
-    [header, columns, columnWidth]
-  );
+  } = useMemo(() => usePreprocess<RecordType>({ header, columns, columnWidth }), [header, columns, columnWidth]);
 
   // 这里关于行位置&行高的缓存考虑
   // 1. 如果放到这里统一计算, 那只要rawData不变其实就只用计算一次,提高空间成本来降低时间成本
@@ -228,7 +266,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
 
   // 单元格渲染
   const GridCell = useCallback(
-    ({ columnIndex, rowIndex, style, data, isScrolling }) => {
+    ({ columnIndex, rowIndex, style, data, isScrolling }: any) => {
       const row = data[rowIndex];
 
       // 判断是否分组行
@@ -252,8 +290,8 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
   );
 
   // 手动将columns划分开,这里需要加上偏移量
-  const _columnWidth = useCallback((index) => columnWidthCache[index + stickyColumnsCount], [columnWidthCache, stickyColumnsCount]),
-    _rowHegiht = useCallback((index) => rowHeightCache[index], [rowHeightCache]);
+  const _columnWidth = useCallback((index: number) => columnWidthCache[index + stickyColumnsCount], [columnWidthCache, stickyColumnsCount]),
+    _rowHeight = useCallback((index: number) => rowHeightCache[index], [rowHeightCache]);
 
   // 初始化偏移
   const { _initialScrollLeft, _initialScrollTop } = useInitialScroll({
@@ -278,82 +316,88 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
         columns,
         rawData,
         columnWidth: _columnWidth,
-        rowHeight: _rowHegiht,
+        rowHeight: _rowHeight,
         grid: refCache.current,
       };
     },
-    [columns, _columnWidth, _rowHegiht, rawData]
+    [columns, _columnWidth, _rowHeight, rawData]
   );
 
+  const _style = useMemo(() => ({ overflow: "overlay", ...(style || {}) }), [style]);
+
   return (
-    <StickyGridContext.Provider
-      value={{
-        height,
-        stickyHeight,
-        stickyWidth,
-        nonStrickyWidth,
-        columns,
-        stickyColumnsCount,
-        nonStrickyColumnsCount,
-        columnLeftCache,
-        columnWidthCache,
-        rowHeightCache,
-        rowTopCache,
-        innerClassName,
-        bodyClassName,
-        stickyBodyClassName,
-        headerClassName,
-        stickyHeaderClassName,
-        rawData: flatRawData,
-        childrenRawName,
-        // func
-        placeholder,
-        groupRowRender,
-        onChange,
-      }}
-    >
-      <VariableSizeGrid
-        ref={refCache}
-        outerRef={outerRef}
-        innerRef={innerRef}
-        direction={direction}
-        style={style}
-        className={className}
-        height={height}
-        width={width}
-        itemData={flatRawData}
-        columnCount={nonStrickyColumnsCount}
-        rowCount={flatRawData.length}
-        columnWidth={_columnWidth}
-        rowHeight={_rowHegiht}
-        useIsScrolling={useIsScrolling}
-        initialScrollLeft={_initialScrollLeft}
-        initialScrollTop={_initialScrollTop}
-        overscanColumnCount={overscanColumnCount}
-        overscanRowCount={overscanRowCount}
-        innerElementType={innerGridElementType}
-        estimatedColumnWidth={avergeColumnWidth} // 冻结列横向滚动条当数据为空时异常,整体宽度计算错误; 数据回空时会使用该值估算宽度,默认为50
-        // outerElementType
-        itemKey={itemKey}
-        onScroll={(props) => {
-          onScroll && onScroll(props);
-        }}
-        onItemsRendered={({
-          overscanColumnStartIndex,
-          overscanColumnStopIndex,
-          overscanRowStartIndex,
-          overscanRowStopIndex,
-          visibleColumnStartIndex,
-          visibleColumnStopIndex,
-          visibleRowStartIndex,
-          visibleRowStopIndex,
-        }) => {
-          // console.log("item render");
+    <StyleSheetManager>
+      <StickyGridContext.Provider
+        value={{
+          height,
+          width,
+          stickyHeight,
+          stickyWidth,
+          nonStrickyWidth,
+          columns,
+          stickyColumnsCount,
+          nonStrickyColumnsCount,
+          columnLeftCache,
+          columnWidthCache,
+          rowHeightCache,
+          rowTopCache,
+          innerClassName,
+          bodyClassName,
+          stickyBodyClassName,
+          headerClassName,
+          stickyHeaderClassName,
+          rawData: flatRawData,
+          childrenRawName,
+          // func
+          placeholder,
+          groupRowRender,
+          emptyRender,
+          onChange,
         }}
       >
-        {GridCell}
-      </VariableSizeGrid>
-    </StickyGridContext.Provider>
+        <VariableSizeGrid
+          ref={refCache}
+          outerRef={outerRef}
+          innerRef={innerRef}
+          direction={direction}
+          style={_style}
+          className={className}
+          height={height}
+          width={width}
+          itemData={flatRawData}
+          columnCount={nonStrickyColumnsCount}
+          rowCount={flatRawData.length}
+          columnWidth={_columnWidth}
+          rowHeight={_rowHeight}
+          useIsScrolling={useIsScrolling}
+          initialScrollLeft={_initialScrollLeft}
+          initialScrollTop={_initialScrollTop}
+          overscanColumnCount={overscanColumnCount}
+          overscanRowCount={overscanRowCount}
+          innerElementType={innerGridElementType}
+          estimatedColumnWidth={avergeColumnWidth} // 冻结列横向滚动条当数据为空时异常,整体宽度计算错误; 数据回空时会使用该值估算宽度,默认为50
+          // outerElementType
+          itemKey={itemKey}
+          onScroll={(props) => {
+            onScroll && onScroll(props);
+          }}
+          onItemsRendered={({
+            overscanColumnStartIndex,
+            overscanColumnStopIndex,
+            overscanRowStartIndex,
+            overscanRowStopIndex,
+            visibleColumnStartIndex,
+            visibleColumnStopIndex,
+            visibleRowStartIndex,
+            visibleRowStopIndex,
+          }) => {
+            // console.log("item render");
+          }}
+        >
+          {GridCell}
+        </VariableSizeGrid>
+      </StickyGridContext.Provider>
+    </StyleSheetManager>
   );
 }
 

@@ -32,6 +32,7 @@ const StickyHeader = ({
   tableHeight,
   stickyHeight,
   stickyWidth,
+  nonStrickyWidth,
   stickyHeaderColumns,
   headerColumns,
   columns,
@@ -39,7 +40,7 @@ const StickyHeader = ({
   className,
   onChange,
 }: IStickyHeaderProps) => {
-  const scrollableStyle = { left: stickyWidth };
+  const scrollableStyle = { left: stickyWidth, width: nonStrickyWidth, height: stickyHeight };
 
   const onSortCallback = useCallback(
     (dataIndex, order, column) => {
@@ -58,7 +59,10 @@ const StickyHeader = ({
       const newColumns = [...columns],
         foundColumnIndex = newColumns.findIndex((col) => col.dataIndex === dataIndex),
         width = column.width + x;
-
+      if (width <= 0) {
+        console.warn("error width");
+        return;
+      }
       newColumns[foundColumnIndex] = { ...column, width };
       onChange && onChange({ columnSize: { dataIndex, width, column, columns: newColumns }, action: "resizeColumn" });
     },

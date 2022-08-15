@@ -6,3 +6,4 @@ lib
 .gitignore
 storybook-static
 typings
+package-lock.json

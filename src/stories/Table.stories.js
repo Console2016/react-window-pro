@@ -1,4 +1,4 @@
-import React, { createRef, Fragment, useEffect } from "react";
+import React, { createRef, Fragment, useEffect, useState } from "react";
 import VariableTable from "../components/VariableTable";
 import { Modal } from "antd";
 import styled from "styled-components";
@@ -252,26 +252,42 @@ export const ScrollExample = () => (
 ScrollExample.storyName = "滚动到指定位置";
 
 // 9 排序
-export const SortExample = Template.bind({});
-SortExample.args = {
-  header: true,
-  width: 800,
-  height: 400,
-  columns: columnsList.map((key) => ({
-    title: renderHeaderCell,
-    dataIndex: key,
-    width: 140,
-    sorter: !["a", "b"].includes(key),
-    sortOrder: key === "c" ? "descend" : undefined,
-  })),
-  rawData: new Array(50).fill(null).map((v, index) => {
-    let row = { id: `${index}` };
+// export const SortExample = Template.bind({});
+export const SortExample = () => {
+  const [columns, setColumns] = useState(
+    columnsList.map((key) => ({
+      title: renderHeaderCell,
+      dataIndex: key,
+      width: 140,
+      sorter: !["a", "b"].includes(key),
+      sortOrder: key === "c" ? "descend" : undefined,
+    }))
+  );
 
-    columnsList.forEach((key) => (row[key] = `${index}_${key}`));
+  const [rawData, setRawData] = useState(
+    new Array(50).fill(null).map((v, index) => {
+      let row = { id: `${index}` };
 
-    return row;
-  }),
-  onChange: action("sort change"),
+      columnsList.forEach((key) => (row[key] = `${index}_${key}`));
+
+      return row;
+    })
+  );
+
+  return (
+    <VariableTable
+      header
+      width={800}
+      height={400}
+      columns={columns}
+      rawData={rawData}
+      onChange={({ sorter }) => {
+        const { columns } = sorter;
+
+        setColumns(columns);
+      }}
+    />
+  );
 };
 SortExample.storyName = "排序";
 
@@ -388,24 +404,53 @@ RepositionColumnExample.args = {
 };
 RepositionColumnExample.storyName = "位置调整";
 
-// 13. bug test
-export const BugTest = () => {
+// 13. 数据为空
+export const EmptyExample = () => {
+  const [columns, setColumns] = useState([]);
+
   useEffect(() => {
     setTimeout(() => {
-      Modal.info({
-        title: "This is a notification message",
-        content: (
-          <div>
-            <p>some messages...some messages...</p>
-            <p>some messages...some messages...</p>
-          </div>
-        ),
-        onOk() {},
-        keyboard: true,
-      });
-    }, 10000),
-      [];
-  });
+      setColumns(
+        columnsList.map((key) => ({
+          title: renderHeaderCell,
+          dataIndex: key,
+          width: 60,
+          reposition: ["a", "b", "c", "d", "e"].includes(key),
+        }))
+      );
+    }, 5000);
+  }, []);
+
+  return (
+    <Container>
+      <VariableTable header={true} width={800} height={400} columns={columns} rawData={[]} />
+    </Container>
+  );
+};
+EmptyExample.storyName = "空数据";
+
+// 13. bug test
+export const BugTest = () => {
+  const [columns, setColumns] = useState(
+    columnsList.map((key) => ({ title: renderHeaderCell, dataIndex: key, width: 140, resizer: true, sorter: true, reposition: true }))
+  );
+
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     Modal.info({
+  //       title: "This is a notification message",
+  //       content: (
+  //         <div>
+  //           <p>some messages...some messages...</p>
+  //           <p>some messages...some messages...</p>
+  //         </div>
+  //       ),
+  //       onOk() {},
+  //       keyboard: true,
+  //     });
+  //   }, 10000),
+  //     [];
+  // });
 
   return (
     <Container>
@@ -413,7 +458,7 @@ export const BugTest = () => {
         header={true}
         width={800}
         height={400}
-        columns={columnsList.map((key) => ({ title: renderHeaderCell, dataIndex: key, width: 140, resizer: ["a", "b"].includes(key) }))}
+        columns={columns}
         rawData={new Array(50).fill(null).map((v, index) => {
           let row = { id: `${index}` };
 
@@ -421,9 +466,106 @@ export const BugTest = () => {
 
           return row;
         })}
-        onChange={action("column width change")}
+        onChange={({ sorter, columnSize, columnPosition, action }) => {
+          if (action === "sort") {
+            setColumns(sorter.columns);
+          } else if (action === "resizeColumn") {
+            setColumns(columnSize.columns);
+          } else {
+            setColumns(columnPosition.columns);
+          }
+        }}
       />
     </Container>
   );
 };
 BugTest.storyName = "Bug测试";
+
+// 13. bug test
+export const BugTest2 = () => {
+  const [columns, setColumns] = useState(
+    [
+      {
+          "title": "电场名称",
+          "dataIndex": "farmName",
+          "key": "farmName",
+          "width": 100
+      },
+      {
+          "title": "设备ID",
+          "dataIndex": "deviceId",
+          "key": "deviceId",
+          "width": 100
+      },
+      {
+          "title": "设备名称",
+          "dataIndex": "deviceName",
+          "key": "deviceName",
+          "width": 100
+      },
+      {
+          "title": "设备类型",
+          "dataIndex": "deviceType",
+          "key": "deviceType",
+          "width": 100
+      },
+      {
+          "title": "型号",
+          "dataIndex": "deviceModel",
+          "key": "deviceModel",
+          "width": 100
+      },
+      {
+          "title": "操作",
+          "dataIndex": "operations",
+          "key": "operations",
+          "width": 100
+      }
+  ]
+  );
+
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     Modal.info({
+  //       title: "This is a notification message",
+  //       content: (
+  //         <div>
+  //           <p>some messages...some messages...</p>
+  //           <p>some messages...some messages...</p>
+  //         </div>
+  //       ),
+  //       onOk() {},
+  //       keyboard: true,
+  //     });
+  //   }, 10000),
+  //     [];
+  // });
+
+  return (
+    <Container>
+      <VariableTable
+        header={true}
+        width={800}
+        height={400}
+        columns={columns}
+        rawData={new Array(50).fill(null).map((v, index) => {
+          let row = { id: `${index}` };
+
+          columnsList.forEach((key) => (row[key] = `${index}_${key}`));
+
+          return row;
+        })}
+        onChange={({ sorter, columnSize, columnPosition, action }) => {
+          if (action === "sort") {
+            setColumns(sorter.columns);
+          } else if (action === "resizeColumn") {
+            setColumns(columnSize.columns);
+          } else {
+            setColumns(columnPosition.columns);
+          }
+        }}
+      />
+    </Container>
+  );
+};
+BugTest2.storyName = "Bug测试2";

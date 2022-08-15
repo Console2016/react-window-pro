@@ -31,6 +31,7 @@ const useDragOffset = function ({ direction, style = EmptyStyle, onDrag, onDragE
       isDragging: true,
       origin: { x: clientX, y: clientY },
     }));
+    // console.log("down");
   }, []);
 
   // move
@@ -55,30 +56,36 @@ const useDragOffset = function ({ direction, style = EmptyStyle, onDrag, onDragE
       translationRef.current = translation;
 
       onDrag && onDrag({ translation });
+      // console.log("move");
     },
     [state.origin, onDrag, direction]
   );
 
   // drop
   const handleMouseUp = useCallback(() => {
-    onDragEnd && onDragEnd({ translation: translationRef.current });
+    
     setState((state) => ({
       ...state,
+      translation: { x: 0, y: 0 },
       isDragging: false,
     }));
+
+    onDragEnd && onDragEnd({ translation: translationRef.current });
   }, [onDragEnd]);
 
   // add|remove event
   useEffect(() => {
+    // console.log(state.isDragging);
     if (state.isDragging) {
+      // console.log("addEventListener");
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
-    } else {
+    }
+    return () => {
+      // console.log("return1 removeEventListener"); // why twice
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
-
-      setState((state) => ({ ...state, translation: { x: 0, y: 0 } }));
-    }
+    };
   }, [state.isDragging, handleMouseMove, handleMouseUp]);
 
   // didmount
@@ -113,27 +120,3 @@ const useDragOffset = function ({ direction, style = EmptyStyle, onDrag, onDragE
 };
 
 export default useDragOffset;
-
-// const Component = ({
-//   style,
-//   children,
-//   direction,
-//   onDrag,
-//   onDragEnd,
-// }: {
-//   style: CSSProperties;
-//   direction?: "vertical" | "horizontal";
-//   children: ReactChild;
-//   onDrag?: ({ translation }: { translation: TPosition }) => void;
-//   onDragEnd?: ({ translation }: { translation: TPosition }) => void;
-// }) => {
-//   const translationRef = useRef(Position);
-
-//   return (
-//     <div style={styles} onMouseDown={handleMouseDown}>
-//       {children}
-//     </div>
-//   );
-// };
-
-// export default Component;

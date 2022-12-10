@@ -100,7 +100,12 @@ export interface VariableTable<RecordType> {
   grid: VariableSizeGrid | null;
 }
 
+export interface VariableTableLocale {
+  noData?: string;
+}
+
 export interface IProps<RecordType> {
+  locale?: VariableTableLocale;
   ref?: Ref<VariableSizeGrid>;
   outerRef?: Ref<HTMLElement>;
   innerRef?: Ref<HTMLElement>;
@@ -164,6 +169,8 @@ export interface IStickyContext {
   groupRowRender?: TRowRender;
   emptyRender?: TEmptyRender;
   onChange?: TOnChange;
+
+  locale?: VariableTableLocale;
 }
 
 // 单行表头样式计算结果

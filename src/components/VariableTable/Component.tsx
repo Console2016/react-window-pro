@@ -44,6 +44,7 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
       groupRowRender,
       emptyRender,
       onChange,
+      locale,
     }) => {
       // If useIsScrolling is enabled for this grid, children's props receives an additional isScrolling boolean prop
       const isScrolling = children.length > 0 ? children[0].props.isScrolling : false;
@@ -165,7 +166,7 @@ const innerGridElementType = forwardRef<HTMLDivElement, any>(({ children, ...res
           ) : (
             <div className={bodyClassName} style={emptyStyle}>
               <img src={Empty} style={{ height: "50px", paddingBottom: "10px" }} />
-              暂无数据
+              {locale?.noData ?? "暂无数据"}
             </div>
           )}
         </div>
@@ -238,6 +239,8 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
     stickyBodyClassName = "",
     headerClassName = "",
     stickyHeaderClassName = "",
+
+    locale,
 
     styleSheetManagerProps = EMPTY_MAP,
   } = props;
@@ -349,6 +352,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Var
           stickyHeaderClassName,
           rawData: flatRawData,
           childrenRawName,
+          locale,
           // func
           placeholder,
           groupRowRender,

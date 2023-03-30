@@ -23,6 +23,9 @@
 ## QA
 
 ## ChangeLog
+- 20230330 
+  - 升级react-window、react
+
 - 20221210 
   - 增加多语言参数
 

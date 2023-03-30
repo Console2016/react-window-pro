@@ -2,7 +2,7 @@
  * @Author: sun.t
  * @Date: 2021-02-18 13:23:51
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-02-28 20:59:10
+ * @Last Modified time: 2023-03-30 13:21:43
  */
 import React, { createContext, forwardRef, ReactElement, useCallback, useMemo, ForwardedRef } from "react";
 import { GridChildComponentProps, VariableSizeGrid as Matrix } from "react-window";
@@ -100,7 +100,7 @@ function Component<RecordType>(props: IProps<RecordType>, ref?: ForwardedRef<Mat
       const key = `${rowIndex}-${columnIndex}`;
       const cellData = positionMap[key];
 
-      let _style = { ...style };
+      let _style = { ...style } as any;
 
       if (typeof cellData === "undefined") {
         return null;

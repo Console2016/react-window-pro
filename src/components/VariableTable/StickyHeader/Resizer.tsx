@@ -27,7 +27,16 @@ const Component = ({
 
   const { styles, handleMouseDown } = useDragOffset({ direction: "horizontal", style: dragStyle, onDragEnd });
 
-  return <Resizer style={styles} onMouseDown={handleMouseDown} />;
+  return (
+    <Resizer
+      style={styles}
+      onMouseDown={handleMouseDown}
+      onClick={(e) => {
+        e.preventDefault(); //取消dragover的默认行为
+        e.stopPropagation();
+      }}
+    />
+  );
 };
 
 export default Component;

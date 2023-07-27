@@ -14,6 +14,7 @@ interface IProps {
 const Cell = styled.div``;
 
 const Component = ({ columnIndex, rowIndex, style, column, record }: IProps) => {
+  if (!column) return null;
   const { render, dataIndex } = column,
     value = record[dataIndex];
 

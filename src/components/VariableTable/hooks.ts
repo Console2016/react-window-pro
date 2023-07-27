@@ -2,7 +2,7 @@
  * @Author: sun.t
  * @Date: 2021-03-13 22:15:40
  * @Last Modified by: sun.t
- * @Last Modified time: 2021-03-13 23:52:23
+ * @Last Modified time: 2023-07-27 22:46:45
  */
 import { useEffect, useMemo, useRef } from "react";
 import { VariableSizeGrid } from "react-window";
@@ -92,7 +92,7 @@ export function usePreprocess<RecordType>({ header, columns, columnWidth }: IPre
     0
   );
   // 非冻结列平均列宽
-  const avergeColumnWidth = Math.ceil(nonStrickyWidth / nonStrickyColumns.length);
+  const avergeColumnWidth = Math.ceil(nonStrickyWidth / nonStrickyColumns.length) || 0;
 
   // 计算所有列left偏移量
   const columnLeftCache = columns.reduce(
@@ -111,7 +111,8 @@ export function usePreprocess<RecordType>({ header, columns, columnWidth }: IPre
     stickyWidth,
     nonStrickyWidth,
     stickyColumnsCount: stickyColumns.length,
-    nonStrickyColumnsCount: nonStrickyColumns.length,
+    // 当全部冻结的时候，由于基础表格没有列会导致所有国定列也不显示
+    nonStrickyColumnsCount: nonStrickyColumns.length || 1,
     columnLeftCache,
     columnWidthCache,
     avergeColumnWidth,

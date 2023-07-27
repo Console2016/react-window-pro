@@ -21,14 +21,14 @@ const TemplateWithContainer = (args) => (
 
 const columnsList = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w"];
 
-// 1. 1000条数据
+// 1. 100条数据
 export const Default = Template.bind({});
 Default.args = {
   header: true,
   width: 800,
   height: 400,
   columns: columnsList.map((key) => ({ title: key, dataIndex: key, width: 140 })),
-  rawData: new Array(1000).fill(null).map((v, index) => {
+  rawData: new Array(100).fill(null).map((v, index) => {
     let row = { id: `${index}` };
 
     columnsList.forEach((key) => (row[key] = `${index}_${key}`));
@@ -44,7 +44,7 @@ ColumnsExample.args = {
   width: 800,
   height: 400,
   columns: columnsList.map((key) => ({ title: key, dataIndex: key, width: 140 })),
-  rawData: new Array(1000).fill(null).map((v, index) => {
+  rawData: new Array(50).fill(null).map((v, index) => {
     let row = { id: `${index}` };
 
     columnsList.forEach((key) => (row[key] = `${index}_${key}`));
@@ -60,8 +60,8 @@ StickyColumnsExample.args = {
   header: false,
   width: 800,
   height: 400,
-  columns: columnsList.map((key, index) => ({ title: key, dataIndex: key, width: 140, fixed: index < 3 })),
-  rawData: new Array(1000).fill(null).map((v, index) => {
+  columns: columnsList.map((key, index) => ({ title: key, dataIndex: key, width: 140, fixed: true })),
+  rawData: new Array(50).fill(null).map((v, index) => {
     let row = { id: `${index}` };
 
     columnsList.forEach((key) => (row[key] = `${index}_${key}`));
@@ -146,7 +146,7 @@ SkeletonExample.args = {
   width: 800,
   height: 400,
   columns: columnsList.map((key, index) => ({ title: key, dataIndex: key, width: 140, fixed: index < 3, render: renderCell })),
-  rawData: new Array(1000).fill(null).map((v, index) => {
+  rawData: new Array(50).fill(null).map((v, index) => {
     let row = { id: `${index}` };
 
     columnsList.forEach((key) => (row[key] = `${index}_${key}`));
@@ -166,7 +166,7 @@ InitialOffsetExample.args = {
   width: 800,
   height: 400,
   columns: columnsList.map((key, index) => ({ title: key, dataIndex: key, width: 140 })),
-  rawData: new Array(1000).fill(null).map((v, index) => {
+  rawData: new Array(48).fill(null).map((v, index) => {
     let row = { id: `${index}` };
 
     columnsList.forEach((key) => (row[key] = `${index}_${key}`));
@@ -174,28 +174,28 @@ InitialOffsetExample.args = {
     return row;
   }),
   initialScrollLeft: 100,
-  initialScrollTop: 1000,
+  initialScrollTop: 50,
 };
 InitialOffsetExample.storyName = "初始化偏移[偏移量]";
 
 // 7. 初始化偏移[index]
-export const InitialIndexOffsetExample = Template.bind({});
-InitialIndexOffsetExample.args = {
-  header: false,
-  width: 800,
-  height: 400,
-  columns: columnsList.map((key, index) => ({ title: key, dataIndex: key, width: 140 })),
-  rawData: new Array(1000).fill(null).map((v, index) => {
-    let row = { id: `${index}` };
+// export const InitialIndexOffsetExample = Template.bind({});
+// InitialIndexOffsetExample.args = {
+//   header: false,
+//   width: 800,
+//   height: 400,
+//   columns: columnsList.map((key, index) => ({ title: key, dataIndex: key, width: 140 })),
+//   rawData: new Array(50).fill(null).map((v, index) => {
+//     let row = { id: `${index}` };
 
-    columnsList.forEach((key) => (row[key] = `${index}_${key}`));
+//     columnsList.forEach((key) => (row[key] = `${index}_${key}`));
 
-    return row;
-  }),
-  initialScrollRowIndex: (flatRawData) => 100,
-  initialScrollColumnIndex: (columns) => 10,
-};
-InitialIndexOffsetExample.storyName = "初始化偏移[index]";
+//     return row;
+//   }),
+//   initialScrollRowIndex: (flatRawData) => 100,
+//   initialScrollColumnIndex: (columns) => 10,
+// };
+// InitialIndexOffsetExample.storyName = "初始化偏移[index]";
 
 // 8. 滚动到指定项目
 let ScrollGridRef = createRef();
@@ -237,7 +237,7 @@ export const ScrollExample = () => (
         width: 800,
         height: 400,
         columns: columnsList.map((key, index) => ({ title: key, dataIndex: key, width: 140, fixed: index < 3 })),
-        rawData: new Array(1000).fill(null).map((v, index) => {
+        rawData: new Array(50).fill(null).map((v, index) => {
           let row = { id: `${index}` };
 
           columnsList.forEach((key) => (row[key] = `${index}_${key}`));
@@ -298,8 +298,7 @@ const GroupRow = styled.div`
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-}
-`;
+}`;
 export const GroupExample = TemplateWithContainer.bind({});
 GroupExample.args = {
   header: true,
@@ -309,7 +308,7 @@ GroupExample.args = {
   rawData: new Array(3).fill(null).map((groupValue, groupIndex) => {
     const group = { id: groupIndex, children: [] };
 
-    group.children = new Array(100).fill(null).map((value, index) => {
+    group.children = new Array(10).fill(null).map((value, index) => {
       let row = { id: `${index}` };
       columnsList.forEach((key) => (row[key] = `${groupIndex}_${index}_${key}`));
       return row;
@@ -340,7 +339,7 @@ MultiGroupExample.args = {
     group.children = new Array(5).fill(null).map((cgroupValue, cgroupIndex) => {
       let cgroup = { id: `${groupIndex}-${cgroupIndex}`, children: [] };
 
-      cgroup.children = new Array(10).fill(null).map((value, index) => {
+      cgroup.children = new Array(5).fill(null).map((value, index) => {
         let row = { id: `${groupIndex}-${cgroupIndex}-${index}` };
 
         columnsList.forEach((key) => (row[key] = `${groupIndex}_${cgroupIndex}_${index}_${key}`));
@@ -483,46 +482,44 @@ BugTest.storyName = "Bug测试";
 
 // 13. bug test
 export const BugTest2 = () => {
-  const [columns, setColumns] = useState(
-    [
-      {
-          "title": "电场名称",
-          "dataIndex": "farmName",
-          "key": "farmName",
-          "width": 100
-      },
-      {
-          "title": "设备ID",
-          "dataIndex": "deviceId",
-          "key": "deviceId",
-          "width": 100
-      },
-      {
-          "title": "设备名称",
-          "dataIndex": "deviceName",
-          "key": "deviceName",
-          "width": 100
-      },
-      {
-          "title": "设备类型",
-          "dataIndex": "deviceType",
-          "key": "deviceType",
-          "width": 100
-      },
-      {
-          "title": "型号",
-          "dataIndex": "deviceModel",
-          "key": "deviceModel",
-          "width": 100
-      },
-      {
-          "title": "操作",
-          "dataIndex": "operations",
-          "key": "operations",
-          "width": 100
-      }
-  ]
-  );
+  const [columns, setColumns] = useState([
+    {
+      title: "电场名称",
+      dataIndex: "farmName",
+      key: "farmName",
+      width: 100,
+    },
+    {
+      title: "设备ID",
+      dataIndex: "deviceId",
+      key: "deviceId",
+      width: 100,
+    },
+    {
+      title: "设备名称",
+      dataIndex: "deviceName",
+      key: "deviceName",
+      width: 100,
+    },
+    {
+      title: "设备类型",
+      dataIndex: "deviceType",
+      key: "deviceType",
+      width: 100,
+    },
+    {
+      title: "型号",
+      dataIndex: "deviceModel",
+      key: "deviceModel",
+      width: 100,
+    },
+    {
+      title: "操作",
+      dataIndex: "operations",
+      key: "operations",
+      width: 100,
+    },
+  ]);
 
   // useEffect(() => {
   //   setTimeout(() => {

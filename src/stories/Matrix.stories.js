@@ -3,6 +3,7 @@ import VariableMatrix from "../components/VariableMatrix";
 // import { useSize } from "./common/useSize";
 import styled from "styled-components";
 import randomColor from "./common/randomColor";
+import mock_1 from "./mock/1.json";
 import mock_2 from "./mock/2.json";
 import mock_4 from "./mock/4.json";
 // import { MatrixData1 } from "./dummyData";
@@ -139,23 +140,7 @@ CustomGroupRowClassExample.args = {
   height: 400,
   cellHeight: 80,
   cellWidth: 200,
-  rawData: mock_4,
-  // rawData: new Array(3).fill(null).map((groupValue, groupIndex) => {
-  //   const group = { id: groupIndex, children: [] };
-
-  //   group.children = new Array(5).fill(null).map((cgroupValue, cgroupIndex) => {
-  //     const cgroup = { id: `${groupIndex}-${cgroupIndex}`, children: [] };
-
-  //     cgroup.children = new Array(100).fill(null).map((value, index) => {
-  //       const cell = { id: `${groupIndex}-${cgroupIndex}-${index}` };
-  //       return cell;
-  //     });
-
-  //     return cgroup;
-  //   });
-
-  //   return group;
-  // }),
+  rawData: mock_1,
   groupRender: ({ style }) => {
     return (
       <div style={{ ...style, backgroundColor: randomColor() }}>
@@ -326,8 +311,8 @@ InitialOffsetExample.args = {
   height: 400,
   cellHeight: 80,
   cellWidth: 200,
-  rawData: new Array(3000).fill(null).map((value, index) => ({ id: index })),
-  initialScrollTop: 1000,
+  rawData: new Array(200).fill(null).map((value, index) => ({ id: index })),
+  initialScrollTop: 50,
 };
 InitialOffsetExample.storyName = "初始化偏移";
 

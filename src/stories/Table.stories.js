@@ -57,10 +57,10 @@ ColumnsExample.storyName = "无列头";
 // 3. 冻结列
 export const StickyColumnsExample = Template.bind({});
 StickyColumnsExample.args = {
-  header: false,
+  header: true,
   width: 800,
   height: 400,
-  columns: columnsList.map((key, index) => ({ title: key, dataIndex: key, width: 140, fixed: true })),
+  columns: columnsList.map((key, index) => ({ title: key, dataIndex: key, width: 140, fixed: index < 5 })),
   rawData: new Array(50).fill(null).map((v, index) => {
     let row = { id: `${index}` };
 

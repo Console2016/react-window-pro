@@ -2,7 +2,7 @@
  * @Author: sun.t
  * @Date: 2021-03-13 22:15:40
  * @Last Modified by: sun.t
- * @Last Modified time: 2023-07-27 22:46:45
+ * @Last Modified time: 2023-07-29 00:14:39
  */
 import { useEffect, useMemo, useRef } from "react";
 import { VariableSizeGrid } from "react-window";
@@ -80,6 +80,12 @@ export function usePreprocess<RecordType>({ header, columns, columnWidth }: IPre
     }
   }
 
+  // 当所有列被冻结
+  if (nonStrickyColumns.length === 0) {
+    nonStrickyColumns = stickyColumns;
+    stickyColumns = [];
+  }
+
   // 计算所有宽度 columnWidth() -> column.width -> DEFAULT_COLUMN_WIDTH
   const columnWidthCache: number[] = columns.map((column, index) =>
     columnWidth ? columnWidth(index) : column.width ? Number(column.width) : DEFAULT_COLUMN_WIDTH
@@ -112,7 +118,7 @@ export function usePreprocess<RecordType>({ header, columns, columnWidth }: IPre
     nonStrickyWidth,
     stickyColumnsCount: stickyColumns.length,
     // 当全部冻结的时候，由于基础表格没有列会导致所有国定列也不显示
-    nonStrickyColumnsCount: nonStrickyColumns.length || 1,
+    nonStrickyColumnsCount: nonStrickyColumns.length,
     columnLeftCache,
     columnWidthCache,
     avergeColumnWidth,
